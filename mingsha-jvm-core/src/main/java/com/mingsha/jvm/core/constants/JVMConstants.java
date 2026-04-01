@@ -1,0 +1,121 @@
+package com.mingsha.jvm.core.constants;
+
+/**
+ * JVM constant definitions for the Mingsha JVM implementation.
+ */
+public final class JVMConstants {
+    private JVMConstants() { throw new UnsupportedOperationException(); }
+
+    public static final int CLASS_FILE_MAGIC = 0xCAFEBABE;
+    public static final int JVM_VERSION_MAJOR = 17;
+    public static final int JVM_VERSION_MINOR = 0;
+
+    public static final int ACC_PUBLIC = 0x0001;
+    public static final int ACC_PRIVATE = 0x0002;
+    public static final int ACC_PROTECTED = 0x0004;
+    public static final int ACC_STATIC = 0x0008;
+    public static final int ACC_FINAL = 0x0010;
+    public static final int ACC_SYNCHRONIZED = 0x0020;
+    public static final int ACC_NATIVE = 0x0100;
+    public static final int ACC_ABSTRACT = 0x0400;
+
+    public static final int OBJECT_ALIGNMENT = 8;
+    public static final int OBJECT_HEADER_SIZE = 16;
+
+    public static final int NOP = 0;
+    public static final int ACONST_NULL = 1;
+    public static final int ICONST_M1 = 2;
+    public static final int ICONST_0 = 3;
+    public static final int ICONST_1 = 4;
+    public static final int ICONST_2 = 5;
+    public static final int ICONST_3 = 6;
+    public static final int ICONST_4 = 7;
+    public static final int ICONST_5 = 8;
+    public static final int LCONST_0 = 9;
+    public static final int LCONST_1 = 10;
+    public static final int FCONST_0 = 11;
+    public static final int FCONST_1 = 12;
+    public static final int FCONST_2 = 13;
+    public static final int DCONST_0 = 14;
+    public static final int DCONST_1 = 15;
+    public static final int BIPUSH = 16;
+    public static final int SIPUSH = 17;
+    public static final int LDC = 18;
+    public static final int LDC_W = 19;
+    public static final int LDC2_W = 20;
+    public static final int ILOAD = 21;
+    public static final int LLOAD = 22;
+    public static final int FLOAD = 23;
+    public static final int DLOAD = 24;
+    public static final int ALOAD = 25;
+    public static final int IALOAD = 32;
+    public static final int ISTORE = 54;
+    public static final int LSTORE = 55;
+    public static final int FSTORE = 56;
+    public static final int DSTORE = 57;
+    public static final int ASTORE = 58;
+    public static final int IASTORE = 79;
+    public static final int POP = 87;
+    public static final int POP2 = 88;
+    public static final int DUP = 89;
+    public static final int SWAP = 95;
+    public static final int IADD = 96;
+    public static final int LADD = 97;
+    public static final int ISUB = 100;
+    public static final int LSUB = 101;
+    public static final int IMUL = 104;
+    public static final int LMUL = 105;
+    public static final int IDIV = 108;
+    public static final int LDIV = 109;
+    public static final int IREM = 112;
+    public static final int LREM = 113;
+    public static final int IINC = 132;
+    public static final int I2L = 133;
+    public static final int I2F = 134;
+    public static final int I2D = 135;
+    public static final int L2I = 136;
+    public static final int F2I = 139;
+    public static final int F2L = 140;
+    public static final int F2D = 141;
+    public static final int D2I = 142;
+    public static final int D2L = 143;
+    public static final int D2F = 144;
+    public static final int IFEQ = 153;
+    public static final int IFNE = 154;
+    public static final int IFLT = 155;
+    public static final int IFGE = 156;
+    public static final int IFGT = 157;
+    public static final int IFLE = 158;
+    public static final int IF_ICMPEQ = 159;
+    public static final int IF_ICMPNE = 160;
+    public static final int IF_ICMPLT = 161;
+    public static final int IF_ICMPGE = 162;
+    public static final int IF_ICMPGT = 163;
+    public static final int IF_ICMPLE = 164;
+    public static final int GOTO = 167;
+    public static final int TABLESWITCH = 170;
+    public static final int LOOKUPSWITCH = 171;
+    public static final int IRETURN = 172;
+    public static final int LRETURN = 173;
+    public static final int FRETURN = 174;
+    public static final int DRETURN = 175;
+    public static final int ARETURN = 176;
+    public static final int RETURN = 177;
+    public static final int GETSTATIC = 178;
+    public static final int PUTSTATIC = 179;
+    public static final int GETFIELD = 180;
+    public static final int PUTFIELD = 181;
+    public static final int INVOKEVIRTUAL = 182;
+    public static final int INVOKESPECIAL = 183;
+    public static final int INVOKESTATIC = 184;
+    public static final int INVOKEINTERFACE = 185;
+    public static final int NEW = 187;
+    public static final int NEWARRAY = 188;
+    public static final int ANEWARRAY = 189;
+    public static final int ARRAYLENGTH = 190;
+    public static final int ATHROW = 191;
+    public static final int CHECKCAST = 192;
+    public static final int INSTANCEOF = 193;
+    public static final int MONITORENTER = 194;
+    public static final int MONITOREXIT = 195;
+}
