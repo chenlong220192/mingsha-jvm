@@ -1,0 +1,2 @@
+#!/bin/sh
+exec java -cp boot/mingsha-jvm-boot-1.0.0-SNAPSHOT.jar:lib/* com.mingsha.jvm.boot.Main "$@"
