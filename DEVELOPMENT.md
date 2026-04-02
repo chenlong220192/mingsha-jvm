@@ -130,9 +130,9 @@
 - [x] 覆盖率目标: 90%+ (109 tests passing)
 
 ### 阶段12: 验收测试
-- [x] L1: 单元测试
+- [x] L1: 单元测试 (109 tests)
 - [x] L2: 集成测试
-- [ ] L3: 自举测试 (HelloWorld) - 待完整字节码支持
+- [x] L3: 自举测试 (HelloWorld) - 输出 "Hello, World!"
 - [ ] L4: 测试套件
 
 ---
@@ -140,6 +140,9 @@
 ## Git 提交历史
 
 ```
+8b28c0a feat(boot): Add HelloWorld bootstrap execution support
+e76617b fix(jvm): Correct JVM bytecode constants and extend interpreter
+79703f0 docs: Update DEVELOPMENT.md with progress and SHA256 checksums
 315ce1e test(all): Add JUnit 5 unit tests for all modules
 1da97c6 test(core): Add JUnit 5 tests for Core module
 03f5a52 refactor(boot): Enhance boot module with logging
