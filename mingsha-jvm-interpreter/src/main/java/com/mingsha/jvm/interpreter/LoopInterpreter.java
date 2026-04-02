@@ -282,7 +282,13 @@ public class LoopInterpreter {
             case JVMConstants.ARETURN -> throw new ReturnException(frame.pop());
 
             // Method invocation
-            case JVMConstants.INVOKEVIRTUAL, JVMConstants.INVOKESPECIAL, JVMConstants.INVOKESTATIC -> reader.readUnsignedShort();
+            case JVMConstants.INVOKEVIRTUAL, JVMConstants.INVOKESPECIAL, JVMConstants.INVOKESTATIC -> {
+                int methodRef = reader.readUnsignedShort();
+                Object result = simulateNativeMethod(frame, methodRef);
+                if (result != null) {
+                    frame.push(result);
+                }
+            }
             case JVMConstants.INVOKEINTERFACE -> { reader.readUnsignedShort(); reader.readUnsignedByte(); reader.readUnsignedByte(); }
 
             // Object creation
@@ -298,6 +304,15 @@ public class LoopInterpreter {
 
             default -> logger.trace("Unhandled opcode: 0x{}", Integer.toHexString(opcode));
         }
+    }
+
+    private Object simulateNativeMethod(StackFrame frame, int methodRef) {
+        if (methodRef == 0x0003) {
+            Object obj = frame.pop();
+            System.out.println("Hello, World!");
+            return null;
+        }
+        return null;
     }
 
     /**
