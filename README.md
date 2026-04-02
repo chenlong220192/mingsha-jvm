@@ -137,15 +137,18 @@ mingsha-jvm-1.0.0-SNAPSHOT/
 ## Makefile Targets
 
 | Target | Description |
-|--------|-------------|
+|---------|-------------|
 | `make help` | Display this help message |
 | `make clean` | Clean build artifacts |
 | `make compile` | Compile all modules |
 | `make test` | Run unit tests |
+| `make test-l4` | Run L4 test suite |
 | `make install` | Install to local repository |
 | `make package` | Build distribution packages |
-| `make verify` | Full verification |
-| `make hello` | Run HelloWorld bootstrap test |
+| `make verify` | Full verification (clean + compile + test + package) |
+| `make hello` | HelloWorld bootstrap test |
+| `make run-all-tests` | Run all acceptance tests (L1 + L4) |
+| `make quick` | Quick build (clean + compile only) |
 
 ## Testing
 
@@ -157,6 +160,8 @@ mingsha-jvm-1.0.0-SNAPSHOT/
 | L2 | Integration Tests | ✅ All modules compile |
 | L3 | Bootstrap Test | ✅ HelloWorld executes |
 | L4 | Test Suite | ✅ 5 tests (Arithmetic, Conditional, Loop, MethodCall, FieldAccess) |
+
+**Total**: 108 tests (103 unit + 5 L4)
 
 ## License
 
