@@ -1,42 +1,70 @@
 package com.mingsha.jvm.native_;
 
-import java.util.HashMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * JNI Bridge for native method simulation.
+ * <p>
+ * Simulates JNI native method invocation.
+ *
+ * @version 1.0.0
  */
 public class JNIBridge {
-    private static final JNIBridge INSTANCE = new JNIBridge();
-    private final Map<String, NativeMethod> nativeMethods = new HashMap<>();
 
+    /** Logger instance */
+    private static final Logger logger = LoggerFactory.getLogger(JNIBridge.class);
+
+    /** Singleton instance */
+    private static final JNIBridge INSTANCE = new JNIBridge();
+
+    /** Native method registry */
+    private final Map<String, NativeMethod> nativeMethods = new ConcurrentHashMap<>();
+
+    /** Private constructor for singleton */
     private JNIBridge() {
         registerSimulatedNatives();
+        logger.info("JNIBridge initialized with {} methods", nativeMethods.size());
     }
 
+    /** @return singleton instance */
     public static JNIBridge getInstance() { return INSTANCE; }
 
+    /**
+     * Registers a native method.
+     */
     public void registerNative(String className, String methodName, String signature, NativeMethod method) {
-        nativeMethods.put(className + "." + methodName + signature, method);
+        String key = className + "." + methodName + signature;
+        nativeMethods.put(key, method);
+        logger.debug("Registered native: {}{}", methodName, signature);
     }
 
+    /**
+     * Invokes a native method.
+     */
     public Object invokeNative(String className, String methodName, String signature, Object[] args) {
-        NativeMethod method = nativeMethods.get(className + "." + methodName + signature);
+        String key = className + "." + methodName + signature;
+        NativeMethod method = nativeMethods.get(key);
         if (method != null) {
+            logger.debug("Invoking native: {}{}", methodName, signature);
             return method.invoke(args);
         }
-        throw new UnsupportedOperationException("Native method not found: " + className + "." + methodName);
+        logger.warn("Native method not found: {}{}", methodName, signature);
+        throw new UnsupportedOperationException("Native method not found: " + className + "." + methodName + signature);
     }
 
+    /** Registers simulated native methods */
     private void registerSimulatedNatives() {
-        // Simulated Object methods
         registerNative("java/lang/Object", "hashCode", "()I", args -> 0);
         registerNative("java/lang/Object", "getClass", "()Ljava/lang/Class;", args -> null);
         registerNative("java/lang/Object", "clone", "()Ljava/lang/Object;", args -> null);
-        // Simulated System methods
-        registerNative("java/lang/System", "arraycopy", "(Ljava/lang/Object;ILjava/lang/Object;II)V", args -> { return null; });
+        registerNative("java/lang/System", "arraycopy", "(Ljava/lang/Object;ILjava/lang/Object;II)V", args -> null);
+        logger.debug("Registered {} simulated native methods", nativeMethods.size());
     }
 
+    /** Functional interface for native methods */
     @FunctionalInterface
     public interface NativeMethod {
         Object invoke(Object[] args);
