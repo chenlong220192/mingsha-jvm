@@ -81,6 +81,22 @@ public class KlassModel {
         logger.trace("Added field: {}:{}", field.name, field.descriptor);
     }
 
+    public Integer getFieldIndex(String fieldName) {
+        int index = 0;
+        for (FieldInfo field : fields.values()) {
+            if (field.name.equals(fieldName)) {
+                return index;
+            }
+            index++;
+        }
+        return null;
+    }
+
+    public MethodInfo findMethod(String methodName, String methodDesc) {
+        String key = methodName + ":" + methodDesc;
+        return methods.get(key);
+    }
+
     /**
      * Method metadata.
      */

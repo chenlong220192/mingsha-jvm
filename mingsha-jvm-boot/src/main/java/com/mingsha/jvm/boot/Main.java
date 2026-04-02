@@ -6,9 +6,13 @@ import com.mingsha.jvm.core.MingshaVMVersion;
 import com.mingsha.jvm.core.constants.JVMConstants;
 import com.mingsha.jvm.interpreter.LoopInterpreter;
 import com.mingsha.jvm.runtime.thread.MingshaThread;
+import com.mingsha.jvm.runtime.methodarea.MethodArea;
 import com.mingsha.jvm.runtime.methodarea.KlassModel;
 import com.mingsha.jvm.runtime.stack.JavaStack;
 import com.mingsha.jvm.runtime.stack.StackFrame;
+import com.mingsha.jvm.runtime.heap.HeapObject;
+import com.mingsha.jvm.classloader.BootstrapClassLoader;
+import com.mingsha.jvm.native_.JNIBridge;
 
 public class Main {
 
@@ -20,6 +24,8 @@ public class Main {
         System.out.println("OpenJDK Runtime Environment (build " + MingshaVMVersion.getJVMVersion() + ")");
         System.out.println("OpenJDK 64-Bit Server VM (build " + MingshaVMVersion.getJVMVersion() + ", mixed mode, sharing)");
         System.out.println();
+
+        initializeJVM();
 
         if (args.length == 0) {
             printUsage();
@@ -42,6 +48,19 @@ public class Main {
         logger.info("JVM execution complete");
     }
 
+    private static void initializeJVM() {
+        BootstrapClassLoader bootstrapLoader = new BootstrapClassLoader();
+        MethodArea methodArea = MethodArea.getInstance();
+        methodArea.setClassLoader(bootstrapLoader);
+
+        LoopInterpreter interpreter = LoopInterpreter.getInstance();
+        interpreter.getMethodResolver().registerClass("java/lang/Object", 
+            new KlassModel("java/lang/Object", "", JVMConstants.ACC_PUBLIC));
+
+        JNIBridge.getInstance();
+        logger.info("JVM subsystems initialized");
+    }
+
     private static void executeClass(String className, String[] args) {
         logger.info("Executing class: {}", className);
         
@@ -49,6 +68,8 @@ public class Main {
             MingshaThread thread = new MingshaThread("main", Thread.NORM_PRIORITY);
             KlassModel klass = createHelloWorldClass(className);
             
+            MethodArea.getInstance().addKlass(klass);
+
             KlassModel.MethodInfo mainMethod = findMainMethod(klass);
             if (mainMethod == null) {
                 System.out.println("Error: Main method not found in class " + className);
@@ -58,6 +79,7 @@ public class Main {
             StackFrame frame = new StackFrame(mainMethod.maxLocals, mainMethod.maxStack);
             frame.setMethodName("main");
             frame.setClassName(className);
+            frame.setCurrentKlass(klass);
             
             String[] initArgs = new String[args.length];
             System.arraycopy(args, 0, initArgs, 0, args.length);

@@ -46,6 +46,97 @@ public class ConstantPool {
         return null;
     }
 
+    public Entry getMethodRef(int index) {
+        Entry entry = getEntry(index);
+        if (entry != null && entry.type == EntryType.METHODREF) {
+            return entry;
+        }
+        return null;
+    }
+
+    public Entry getFieldRef(int index) {
+        Entry entry = getEntry(index);
+        if (entry != null && entry.type == EntryType.FIELDREF) {
+            return entry;
+        }
+        return null;
+    }
+
+    public String getMethodClassName(int methodRefIndex) {
+        Entry methodRef = getMethodRef(methodRefIndex);
+        if (methodRef != null) {
+            return getClassName(methodRef.classIndex);
+        }
+        return null;
+    }
+
+    public String getMethodName(int methodRefIndex) {
+        Entry methodRef = getMethodRef(methodRefIndex);
+        if (methodRef != null) {
+            Entry nameAndType = getEntry(methodRef.nameIndex);
+            if (nameAndType != null) {
+                return getUtf8(nameAndType.nameIndex);
+            }
+        }
+        return null;
+    }
+
+    public String getMethodDescriptor(int methodRefIndex) {
+        Entry methodRef = getMethodRef(methodRefIndex);
+        if (methodRef != null) {
+            Entry nameAndType = getEntry(methodRef.nameIndex);
+            if (nameAndType != null) {
+                return getUtf8(nameAndType.descriptorIndex);
+            }
+        }
+        return null;
+    }
+
+    public String getFieldClassName(int fieldRefIndex) {
+        Entry fieldRef = getFieldRef(fieldRefIndex);
+        if (fieldRef != null) {
+            return getClassName(fieldRef.classIndex);
+        }
+        return null;
+    }
+
+    public String getFieldName(int fieldRefIndex) {
+        Entry fieldRef = getFieldRef(fieldRefIndex);
+        if (fieldRef != null) {
+            Entry nameAndType = getEntry(fieldRef.nameIndex);
+            if (nameAndType != null) {
+                return getUtf8(nameAndType.nameIndex);
+            }
+        }
+        return null;
+    }
+
+    public String getFieldDescriptor(int fieldRefIndex) {
+        Entry fieldRef = getFieldRef(fieldRefIndex);
+        if (fieldRef != null) {
+            Entry nameAndType = getEntry(fieldRef.nameIndex);
+            if (nameAndType != null) {
+                return getUtf8(nameAndType.descriptorIndex);
+            }
+        }
+        return null;
+    }
+
+    public Object getConstant(int index) {
+        Entry entry = getEntry(index);
+        if (entry == null) {
+            return null;
+        }
+        switch (entry.type) {
+            case INTEGER: return entry.valueInt;
+            case LONG: return entry.valueLong;
+            case FLOAT: return entry.valueFloat;
+            case DOUBLE: return entry.valueDouble;
+            case STRING: return entry.stringValue;
+            default: return null;
+        }
+    }
+
     public static class Entry {
         public final EntryType type;
         public final int nameIndex;

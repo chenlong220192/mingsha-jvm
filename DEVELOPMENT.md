@@ -12,16 +12,20 @@
 
 ## 开发进度
 
-### 2026-04-02: v1.0.0 完整版发布
+### 2026-04-02: v1.0.0 完整版发布 (最终)
 
 #### 已完成
 - [x] 文档完善 (README, NOTICE, DEVELOPMENT.md, Makefile)
 - [x] 10 个 Maven 模块实现
 - [x] 所有模块 Javadoc + SLF4J 日志
-- [x] 单元测试 (103 tests)
+- [x] 单元测试 (103 tests + 5 L4 tests)
 - [x] 集成测试
 - [x] HelloWorld 自举测试 (输出 "Hello, World!")
+- [x] L4 测试套件 (真实字节码执行)
 - [x] 打包制品 (zip/tar.gz)
+- [x] ClassFile 解析器和常量池
+- [x] 方法解析器和对象堆管理
+- [x] 解释器增强 (INVOKESTATIC/VIRTUAL/SPECIAL, NEW, GETFIELD/PUTFIELD)
 
 ---
 

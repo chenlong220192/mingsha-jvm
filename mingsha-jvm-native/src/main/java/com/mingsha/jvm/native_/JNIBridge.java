@@ -60,7 +60,28 @@ public class JNIBridge {
         registerNative("java/lang/Object", "hashCode", "()I", args -> 0);
         registerNative("java/lang/Object", "getClass", "()Ljava/lang/Class;", args -> null);
         registerNative("java/lang/Object", "clone", "()Ljava/lang/Object;", args -> null);
-        registerNative("java/lang/System", "arraycopy", "(Ljava/lang/Object;ILjava/lang/Object;II)V", args -> null);
+        registerNative("java/lang/System", "currentTimeMillis", "()J", args -> System.currentTimeMillis());
+        registerNative("java/lang/System", "arraycopy", "(Ljava/lang/Object;ILjava/lang/Object;II)V", args -> {
+            if (args == null || args.length < 5) {
+                throw new NullPointerException("System.arraycopy requires non-null arguments");
+            }
+            try {
+                System.arraycopy(args[0], ((Number)args[1]).intValue(), 
+                                args[2], ((Number)args[3]).intValue(), 
+                                ((Number)args[4]).intValue());
+            } catch (Exception e) {
+                logger.error("System.arraycopy failed", e);
+            }
+            return null;
+        });
+        registerNative("java/io/PrintStream", "println", "(Ljava/lang/String;)V", args -> {
+            if (args != null && args.length > 0 && args[0] != null) {
+                System.out.println(args[0]);
+            } else {
+                System.out.println();
+            }
+            return null;
+        });
         logger.debug("Registered {} simulated native methods", nativeMethods.size());
     }
 

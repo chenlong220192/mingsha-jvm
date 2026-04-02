@@ -2,6 +2,8 @@ package com.mingsha.jvm.runtime.stack;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.mingsha.jvm.core.classfile.ConstantPool;
+import com.mingsha.jvm.runtime.methodarea.KlassModel;
 
 /**
  * Represents a JVM stack frame.
@@ -48,6 +50,15 @@ public class StackFrame {
     /** Link to previous frame (caller) */
     private StackFrame nextFrame;
 
+    /** Constant pool reference for method resolution */
+    private ConstantPool constantPool;
+
+    /** Current class for method resolution */
+    private KlassModel currentKlass;
+
+    /** Return value for method return */
+    private Object returnValue;
+
     /**
      * Constructor with sizes.
      *
@@ -92,6 +103,24 @@ public class StackFrame {
 
     /** @param frame next frame */
     public void setNextFrame(StackFrame frame) { this.nextFrame = frame; }
+
+    /** @return constant pool */
+    public ConstantPool getConstantPool() { return constantPool; }
+
+    /** @param cp constant pool */
+    public void setConstantPool(ConstantPool cp) { this.constantPool = cp; }
+
+    /** @return current klass */
+    public KlassModel getCurrentKlass() { return currentKlass; }
+
+    /** @param klass current klass */
+    public void setCurrentKlass(KlassModel klass) { this.currentKlass = klass; }
+
+    /** @return return value */
+    public Object getReturnValue() { return returnValue; }
+
+    /** @param value return value */
+    public void setReturnValue(Object value) { this.returnValue = value; }
 
     /**
      * Pushes value onto operand stack.

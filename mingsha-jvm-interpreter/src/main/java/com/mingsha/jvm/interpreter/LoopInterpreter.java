@@ -5,50 +5,42 @@ import org.slf4j.LoggerFactory;
 import com.mingsha.jvm.core.MingshaVMProperties;
 import com.mingsha.jvm.core.constants.JVMConstants;
 import com.mingsha.jvm.core.utils.BytecodeReader;
+import com.mingsha.jvm.core.classfile.ConstantPool;
+import com.mingsha.jvm.runtime.heap.HeapObject;
+import com.mingsha.jvm.runtime.heap.HeapSpace;
+import com.mingsha.jvm.runtime.methodarea.MethodArea;
+import com.mingsha.jvm.runtime.methodarea.KlassModel;
 import com.mingsha.jvm.runtime.stack.JavaStack;
 import com.mingsha.jvm.runtime.stack.StackFrame;
 import com.mingsha.jvm.runtime.thread.MingshaThread;
-import com.mingsha.jvm.runtime.methodarea.KlassModel;
+import com.mingsha.jvm.runtime.MethodResolver;
 
-/**
- * Loop-based bytecode interpreter for Mingsha JVM.
- * <p>
- * Implements the fetch-decode-execute cycle for JVM bytecode.
- *
- * @version 1.0.0
- */
 public class LoopInterpreter {
 
-    /** Logger instance */
     private static final Logger logger = LoggerFactory.getLogger(LoopInterpreter.class);
 
-    /** Singleton instance */
     private static final LoopInterpreter INSTANCE = new LoopInterpreter();
 
-    /** Hot spot threshold for JIT compilation */
     private final int hotSpotThreshold;
+    private final MethodResolver methodResolver;
+    private final MethodArea methodArea;
+    private final HeapSpace heapSpace;
 
-    /** Private constructor for singleton */
     private LoopInterpreter() {
         this.hotSpotThreshold = Integer.parseInt(
                 MingshaVMProperties.getInstance().getProperty("interpreter.hotSpotThreshold", "1000"));
+        this.methodResolver = new MethodResolver();
+        this.methodArea = MethodArea.getInstance();
+        this.heapSpace = new HeapSpace(1024 * 1024, 64 * 1024 * 1024);
         logger.info("LoopInterpreter initialized with hotSpotThreshold={}", hotSpotThreshold);
     }
 
-    /** @return singleton instance */
     public static LoopInterpreter getInstance() { return INSTANCE; }
-
-    /** @return hot spot threshold */
     public int getHotSpotThreshold() { return hotSpotThreshold; }
+    public MethodResolver getMethodResolver() { return methodResolver; }
+    public MethodArea getMethodArea() { return methodArea; }
+    public HeapSpace getHeapSpace() { return heapSpace; }
 
-    /**
-     * Interprets bytecode.
-     *
-     * @param thread the executing thread
-     * @param klass the class
-     * @param method the method
-     * @param bytecode the method bytecode
-     */
     public void interpret(MingshaThread thread, KlassModel klass, KlassModel.MethodInfo method, byte[] bytecode) {
         logger.debug("Interpreting method: {} in class {}", method.name, klass.getName());
 
@@ -57,6 +49,7 @@ public class LoopInterpreter {
             frame = new StackFrame(method.maxLocals, method.maxStack);
             frame.setMethodName(method.name);
             frame.setClassName(klass.getName());
+            frame.setCurrentKlass(klass);
             thread.getStack().pushFrame(frame);
         }
 
@@ -71,7 +64,7 @@ public class LoopInterpreter {
 
                 logger.trace("Executing opcode: 0x{} at pc={}", Integer.toHexString(opcode), pc);
 
-                executeInstruction(opcode, frame, reader);
+                executeInstruction(opcode, frame, reader, thread);
                 instructionCount++;
 
                 if (instructionCount % 10000 == 0) {
@@ -88,16 +81,8 @@ public class LoopInterpreter {
         logger.debug("Method {} completed after {} instructions", method.name, instructionCount);
     }
 
-    /**
-     * Executes a bytecode instruction.
-     *
-     * @param opcode the bytecode opcode
-     * @param frame the stack frame
-     * @param reader the bytecode reader
-     */
-    private void executeInstruction(int opcode, StackFrame frame, BytecodeReader reader) {
+    private void executeInstruction(int opcode, StackFrame frame, BytecodeReader reader, MingshaThread thread) {
         switch (opcode) {
-            // Constants
             case JVMConstants.NOP -> logger.trace("NOP");
             case JVMConstants.ACONST_NULL -> frame.push(null);
             case JVMConstants.ICONST_M1 -> frame.pushInt(-1);
@@ -115,32 +100,33 @@ public class LoopInterpreter {
             case JVMConstants.DCONST_0 -> frame.push(Double.valueOf(0.0));
             case JVMConstants.DCONST_1 -> frame.push(Double.valueOf(1.0));
 
-            // Push
             case JVMConstants.BIPUSH -> frame.pushInt(reader.readByte());
             case JVMConstants.SIPUSH -> frame.pushInt(reader.readShort());
-            case JVMConstants.LDC -> frame.push("ldc_" + reader.readUnsignedByte());
+            case JVMConstants.LDC -> {
+                int index = reader.readUnsignedByte();
+                Object constValue = frame.getConstantPool() != null 
+                    ? frame.getConstantPool().getConstant(index) 
+                    : "ldc_" + index;
+                frame.push(constValue);
+            }
 
-            // Load
             case JVMConstants.ILOAD -> frame.pushInt(frame.getLocalVariableInt(reader.readUnsignedByte()));
             case JVMConstants.LLOAD -> frame.pushLong(frame.popLong());
             case JVMConstants.FLOAD -> frame.push(frame.getLocalVariable(reader.readUnsignedByte()));
             case JVMConstants.DLOAD -> frame.push(frame.getLocalVariable(reader.readUnsignedByte()));
             case JVMConstants.ALOAD -> frame.push(frame.getLocalVariable(reader.readUnsignedByte()));
 
-            // Store
             case JVMConstants.ISTORE -> frame.setLocalVariableInt(reader.readUnsignedByte(), frame.popInt());
             case JVMConstants.LSTORE -> frame.setLocalVariable(reader.readUnsignedByte(), frame.popLong());
             case JVMConstants.FSTORE -> frame.setLocalVariable(reader.readUnsignedByte(), frame.pop());
             case JVMConstants.DSTORE -> frame.setLocalVariable(reader.readUnsignedByte(), frame.pop());
             case JVMConstants.ASTORE -> frame.setLocalVariable(reader.readUnsignedByte(), frame.pop());
 
-            // Stack
             case JVMConstants.POP -> frame.pop();
             case JVMConstants.POP2 -> { frame.pop(); frame.pop(); }
             case JVMConstants.DUP -> { Object v = frame.pop(); frame.push(v); frame.push(v); }
             case JVMConstants.SWAP -> { Object v1 = frame.pop(); Object v2 = frame.pop(); frame.push(v1); frame.push(v2); }
 
-            // Arithmetic
             case JVMConstants.IADD -> { int v2 = frame.popInt(); int v1 = frame.popInt(); frame.pushInt(v1 + v2); }
             case JVMConstants.LADD -> { long v2 = frame.popLong(); long v1 = frame.popLong(); frame.pushLong(v1 + v2); }
             case JVMConstants.ISUB -> { int v2 = frame.popInt(); int v1 = frame.popInt(); frame.pushInt(v1 - v2); }
@@ -161,69 +147,19 @@ public class LoopInterpreter {
                 frame.setLocalVariableInt(idx, frame.getLocalVariableInt(idx) + c);
             }
 
-            // Bitwise
-            case JVMConstants.ISHL -> {
-                int v2 = frame.popInt();
-                int v1 = frame.popInt();
-                frame.pushInt(v1 << v2);
-            }
-            case JVMConstants.ISHR -> {
-                int v2 = frame.popInt();
-                int v1 = frame.popInt();
-                frame.pushInt(v1 >> v2);
-            }
-            case JVMConstants.IUSHR -> {
-                int v2 = frame.popInt();
-                int v1 = frame.popInt();
-                frame.pushInt(v1 >>> v2);
-            }
-            case JVMConstants.IAND -> {
-                int v2 = frame.popInt();
-                int v1 = frame.popInt();
-                frame.pushInt(v1 & v2);
-            }
-            case JVMConstants.IOR -> {
-                int v2 = frame.popInt();
-                int v1 = frame.popInt();
-                frame.pushInt(v1 | v2);
-            }
-            case JVMConstants.IXOR -> {
-                int v2 = frame.popInt();
-                int v1 = frame.popInt();
-                frame.pushInt(v1 ^ v2);
-            }
-            case JVMConstants.LSHL -> {
-                int v2 = frame.popInt();
-                long v1 = frame.popLong();
-                frame.pushLong(v1 << v2);
-            }
-            case JVMConstants.LSHR -> {
-                int v2 = frame.popInt();
-                long v1 = frame.popLong();
-                frame.pushLong(v1 >> v2);
-            }
-            case JVMConstants.LUSHR -> {
-                int v2 = frame.popInt();
-                long v1 = frame.popLong();
-                frame.pushLong(v1 >>> v2);
-            }
-            case JVMConstants.LAND -> {
-                long v2 = frame.popLong();
-                long v1 = frame.popLong();
-                frame.pushLong(v1 & v2);
-            }
-            case JVMConstants.LOR -> {
-                long v2 = frame.popLong();
-                long v1 = frame.popLong();
-                frame.pushLong(v1 | v2);
-            }
-            case JVMConstants.LXOR -> {
-                long v2 = frame.popLong();
-                long v1 = frame.popLong();
-                frame.pushLong(v1 ^ v2);
-            }
+            case JVMConstants.ISHL -> { int v2 = frame.popInt(); int v1 = frame.popInt(); frame.pushInt(v1 << v2); }
+            case JVMConstants.ISHR -> { int v2 = frame.popInt(); int v1 = frame.popInt(); frame.pushInt(v1 >> v2); }
+            case JVMConstants.IUSHR -> { int v2 = frame.popInt(); int v1 = frame.popInt(); frame.pushInt(v1 >>> v2); }
+            case JVMConstants.IAND -> { int v2 = frame.popInt(); int v1 = frame.popInt(); frame.pushInt(v1 & v2); }
+            case JVMConstants.IOR -> { int v2 = frame.popInt(); int v1 = frame.popInt(); frame.pushInt(v1 | v2); }
+            case JVMConstants.IXOR -> { int v2 = frame.popInt(); int v1 = frame.popInt(); frame.pushInt(v1 ^ v2); }
+            case JVMConstants.LSHL -> { int v2 = frame.popInt(); long v1 = frame.popLong(); frame.pushLong(v1 << v2); }
+            case JVMConstants.LSHR -> { int v2 = frame.popInt(); long v1 = frame.popLong(); frame.pushLong(v1 >> v2); }
+            case JVMConstants.LUSHR -> { int v2 = frame.popInt(); long v1 = frame.popLong(); frame.pushLong(v1 >>> v2); }
+            case JVMConstants.LAND -> { long v2 = frame.popLong(); long v1 = frame.popLong(); frame.pushLong(v1 & v2); }
+            case JVMConstants.LOR -> { long v2 = frame.popLong(); long v1 = frame.popLong(); frame.pushLong(v1 | v2); }
+            case JVMConstants.LXOR -> { long v2 = frame.popLong(); long v1 = frame.popLong(); frame.pushLong(v1 ^ v2); }
 
-            // Comparison
             case JVMConstants.IFEQ -> { int offset = reader.readShort(); if (frame.popInt() == 0) reader.skip(offset - 3); }
             case JVMConstants.IFNE -> { int offset = reader.readShort(); if (frame.popInt() != 0) reader.skip(offset - 3); }
             case JVMConstants.IFLT -> { int offset = reader.readShort(); if (frame.popInt() < 0) reader.skip(offset - 3); }
@@ -231,7 +167,6 @@ public class LoopInterpreter {
             case JVMConstants.IFGT -> { int offset = reader.readShort(); if (frame.popInt() > 0) reader.skip(offset - 3); }
             case JVMConstants.IFLE -> { int offset = reader.readShort(); if (frame.popInt() <= 0) reader.skip(offset - 3); }
 
-            // Comparison with branches
             case JVMConstants.LCMP -> {
                 long v2 = frame.popLong();
                 long v1 = frame.popLong();
@@ -258,7 +193,6 @@ public class LoopInterpreter {
                 frame.pushInt(v1 > v2 ? 1 : (v1 < v2 ? -1 : 1));
             }
 
-            // Type conversion
             case JVMConstants.I2L -> frame.pushLong((long) frame.popInt());
             case JVMConstants.I2F -> frame.push(Float.valueOf((float) frame.popInt()));
             case JVMConstants.I2D -> frame.push(Double.valueOf((double) frame.popInt()));
@@ -272,7 +206,6 @@ public class LoopInterpreter {
             case JVMConstants.D2L -> frame.pushLong((long) ((Double) frame.pop()).doubleValue());
             case JVMConstants.D2F -> frame.push(Float.valueOf((float) ((Double) frame.pop()).doubleValue()));
 
-            // Control
             case JVMConstants.GOTO -> reader.skip(reader.readShort() - 3);
             case JVMConstants.RETURN -> throw new ReturnException(null);
             case JVMConstants.IRETURN -> throw new ReturnException(frame.popInt());
@@ -281,43 +214,256 @@ public class LoopInterpreter {
             case JVMConstants.DRETURN -> throw new ReturnException(frame.pop());
             case JVMConstants.ARETURN -> throw new ReturnException(frame.pop());
 
-            // Method invocation
-            case JVMConstants.INVOKEVIRTUAL, JVMConstants.INVOKESPECIAL, JVMConstants.INVOKESTATIC -> {
+            case JVMConstants.INVOKESTATIC -> {
                 int methodRef = reader.readUnsignedShort();
-                Object result = simulateNativeMethod(frame, methodRef);
-                if (result != null) {
-                    frame.push(result);
+                invokeStatic(frame, methodRef, thread);
+            }
+            case JVMConstants.INVOKEVIRTUAL -> {
+                int methodRef = reader.readUnsignedShort();
+                invokeVirtual(frame, methodRef, thread);
+            }
+            case JVMConstants.INVOKESPECIAL -> {
+                int methodRef = reader.readUnsignedShort();
+                invokeSpecial(frame, methodRef, thread);
+            }
+            case JVMConstants.INVOKEINTERFACE -> {
+                reader.readUnsignedShort();
+                reader.readUnsignedByte();
+                reader.readUnsignedByte();
+            }
+
+            case JVMConstants.NEW -> {
+                int classIndex = reader.readUnsignedShort();
+                HeapObject obj = createNewInstance(frame, classIndex);
+                frame.push(obj);
+            }
+            case JVMConstants.NEWARRAY -> frame.push("array_" + reader.readUnsignedByte() + "_" + frame.popInt());
+            case JVMConstants.ARRAYLENGTH -> {
+                Object arr = frame.pop();
+                if (arr instanceof HeapObject) {
+                    frame.pushInt(0);
+                } else {
+                    frame.pushInt(0);
                 }
             }
-            case JVMConstants.INVOKEINTERFACE -> { reader.readUnsignedShort(); reader.readUnsignedByte(); reader.readUnsignedByte(); }
 
-            // Object creation
-            case JVMConstants.NEW -> frame.push("new_obj_" + reader.readUnsignedShort());
-            case JVMConstants.NEWARRAY -> frame.push("array_" + reader.readUnsignedByte() + "_" + frame.popInt());
-            case JVMConstants.ARRAYLENGTH -> frame.pushInt(0);
-
-            // Field access
             case JVMConstants.GETSTATIC -> frame.push("static_" + reader.readUnsignedShort());
             case JVMConstants.PUTSTATIC -> frame.pop();
-            case JVMConstants.GETFIELD -> { frame.pop(); frame.push("field_" + reader.readUnsignedShort()); }
-            case JVMConstants.PUTFIELD -> { frame.pop(); frame.pop(); }
+            case JVMConstants.GETFIELD -> {
+                int fieldRef = reader.readUnsignedShort();
+                Object obj = frame.pop();
+                Object value = getFieldValue(frame, obj, fieldRef);
+                frame.push(value);
+            }
+            case JVMConstants.PUTFIELD -> {
+                int fieldRef = reader.readUnsignedShort();
+                Object value = frame.pop();
+                Object obj = frame.pop();
+                putFieldValue(frame, obj, fieldRef, value);
+            }
 
             default -> logger.trace("Unhandled opcode: 0x{}", Integer.toHexString(opcode));
         }
     }
 
-    private Object simulateNativeMethod(StackFrame frame, int methodRef) {
-        if (methodRef == 0x0003) {
-            Object obj = frame.pop();
-            System.out.println("Hello, World!");
+    private void invokeStatic(StackFrame frame, int methodRef, MingshaThread thread) {
+        ConstantPool cp = frame.getConstantPool();
+        if (cp == null) {
+            logger.warn("No constant pool in frame for INVOKESTATIC");
+            return;
+        }
+
+        String className = cp.getMethodClassName(methodRef);
+        String methodName = cp.getMethodName(methodRef);
+        String methodDesc = cp.getMethodDescriptor(methodRef);
+
+        logger.debug("INVOKESTATIC: {} {} from class {}", methodName, methodDesc, className);
+
+        KlassModel klass = methodArea.getKlass(className);
+        if (klass == null) {
+            logger.warn("Class not found in method area: {}", className);
+            return;
+        }
+
+        KlassModel.MethodInfo method = klass.findMethod(methodName, methodDesc);
+        if (method == null) {
+            logger.warn("Method not found: {} {} in class {}", methodName, methodDesc, className);
+            return;
+        }
+
+        StackFrame newFrame = new StackFrame(method.maxLocals, method.maxStack);
+        newFrame.setMethodName(methodName);
+        newFrame.setClassName(className);
+        newFrame.setCurrentKlass(klass);
+        newFrame.setConstantPool(cp);
+        newFrame.setNextFrame(frame);
+
+        thread.getStack().pushFrame(newFrame);
+
+        try {
+            interpretMethod(thread, klass, method);
+        } catch (ReturnException e) {
+            frame.setReturnValue(e.returnValue);
+        }
+    }
+
+    private void invokeVirtual(StackFrame frame, int methodRef, MingshaThread thread) {
+        Object objRef = frame.pop();
+        if (objRef == null) {
+            logger.warn("INVOKEVIRTUAL on null reference");
+            return;
+        }
+
+        if (!(objRef instanceof HeapObject)) {
+            logger.warn("INVOKEVIRTUAL on non-HeapObject: {}", objRef.getClass());
+            return;
+        }
+
+        HeapObject heapObj = (HeapObject) objRef;
+        ConstantPool cp = frame.getConstantPool();
+        if (cp == null) {
+            return;
+        }
+
+        String methodName = cp.getMethodName(methodRef);
+        String methodDesc = cp.getMethodDescriptor(methodRef);
+
+        logger.debug("INVOKEVIRTUAL: {} {} on object {}", methodName, methodDesc, heapObj);
+
+        KlassModel.MethodInfo method = methodResolver.resolveMethod(heapObj.getKlass(), methodName, methodDesc);
+        if (method == null) {
+            logger.warn("Method not found: {} {}", methodName, methodDesc);
+            return;
+        }
+
+        StackFrame newFrame = new StackFrame(method.maxLocals, method.maxStack);
+        newFrame.setMethodName(methodName);
+        newFrame.setClassName(heapObj.getKlass().getName());
+        newFrame.setCurrentKlass(heapObj.getKlass());
+        newFrame.setConstantPool(cp);
+        newFrame.setNextFrame(frame);
+
+        thread.getStack().pushFrame(newFrame);
+
+        try {
+            interpretMethod(thread, heapObj.getKlass(), method);
+        } catch (ReturnException e) {
+            frame.setReturnValue(e.returnValue);
+        }
+    }
+
+    private void invokeSpecial(StackFrame frame, int methodRef, MingshaThread thread) {
+        ConstantPool cp = frame.getConstantPool();
+        if (cp == null) {
+            return;
+        }
+
+        String className = cp.getMethodClassName(methodRef);
+        String methodName = cp.getMethodName(methodRef);
+        String methodDesc = cp.getMethodDescriptor(methodRef);
+
+        logger.debug("INVOKESPECIAL: {} {} from class {}", methodName, methodDesc, className);
+
+        KlassModel klass = methodArea.getKlass(className);
+        if (klass == null) {
+            logger.warn("Class not found: {}", className);
+            return;
+        }
+
+        KlassModel.MethodInfo method = klass.findMethod(methodName, methodDesc);
+        if (method == null) {
+            logger.warn("Method not found: {} {}", methodName, methodDesc);
+            return;
+        }
+
+        StackFrame newFrame = new StackFrame(method.maxLocals, method.maxStack);
+        newFrame.setMethodName(methodName);
+        newFrame.setClassName(className);
+        newFrame.setCurrentKlass(klass);
+        newFrame.setConstantPool(cp);
+        newFrame.setNextFrame(frame);
+
+        thread.getStack().pushFrame(newFrame);
+
+        try {
+            interpretMethod(thread, klass, method);
+        } catch (ReturnException e) {
+            frame.setReturnValue(e.returnValue);
+        }
+    }
+
+    private void interpretMethod(MingshaThread thread, KlassModel klass, KlassModel.MethodInfo method) {
+        BytecodeReader reader = new BytecodeReader(method.bytecode);
+        StackFrame frame = thread.getStack().getTopFrame();
+        int instructionCount = 0;
+
+        while (reader.hasRemaining()) {
+            int opcode = reader.readUnsignedByte();
+            int pc = reader.getPosition() - 1;
+            frame.setCurrentPc(pc);
+
+            executeInstruction(opcode, frame, reader, thread);
+            instructionCount++;
+
+            if (instructionCount > 100000) {
+                throw new RuntimeException("Possible infinite loop in " + method.name);
+            }
+        }
+    }
+
+    private HeapObject createNewInstance(StackFrame frame, int classIndex) {
+        ConstantPool cp = frame.getConstantPool();
+        if (cp == null) {
+            logger.warn("No constant pool for NEW");
             return null;
+        }
+
+        String className = cp.getClassName(classIndex);
+        if (className == null) {
+            logger.warn("Could not resolve class from index {}", classIndex);
+            return null;
+        }
+
+        logger.debug("Creating new instance of: {}", className);
+
+        KlassModel klass = methodArea.getKlass(className);
+        if (klass == null) {
+            logger.warn("Class not loaded in method area: {}", className);
+            klass = new KlassModel(className, "java/lang/Object", JVMConstants.ACC_PUBLIC);
+            methodArea.addKlass(klass);
+        }
+
+        HeapObject obj = new HeapObject(klass);
+        return obj;
+    }
+
+    private Object getFieldValue(StackFrame frame, Object obj, int fieldRef) {
+        if (obj instanceof HeapObject) {
+            HeapObject heapObj = (HeapObject) obj;
+            ConstantPool cp = frame.getConstantPool();
+            if (cp != null) {
+                String fieldName = cp.getFieldName(fieldRef);
+                if (fieldName != null) {
+                    return heapObj.getField(fieldName);
+                }
+            }
         }
         return null;
     }
 
-    /**
-     * Exception thrown when return instruction is executed.
-     */
+    private void putFieldValue(StackFrame frame, Object obj, int fieldRef, Object value) {
+        if (obj instanceof HeapObject) {
+            HeapObject heapObj = (HeapObject) obj;
+            ConstantPool cp = frame.getConstantPool();
+            if (cp != null) {
+                String fieldName = cp.getFieldName(fieldRef);
+                if (fieldName != null) {
+                    heapObj.setField(fieldName, value);
+                }
+            }
+        }
+    }
+
     public static class ReturnException extends RuntimeException {
         private static final long serialVersionUID = 1L;
         public final Object returnValue;
