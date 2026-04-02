@@ -8,7 +8,7 @@
 
 ## Overview
 
-Mingsha JVM (明沙 JVM) is a professional-grade Java Virtual Machine implementation written in pure Java. It is designed to demonstrate core JVM concepts while maintaining production-quality code standards.
+Mingsha JVM (mingsha JVM) is a professional-grade Java Virtual Machine implementation written in pure Java. It is designed to demonstrate core JVM concepts while maintaining production-quality code standards.
 
 ## Features
 
