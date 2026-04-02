@@ -37,7 +37,7 @@ RESET=\033[0m
 
 # ----------------------------- variables <-----------------------------
 SKIP_TEST ?= false
-VERSION := 1.0.0-SNAPSHOT
+VERSION := 1.0.0
 # ----------------------------- variables >-----------------------------
 
 # ----------------------------- help <-----------------------------
@@ -103,8 +103,8 @@ package: ## 📦 构建发行版包
 	$(BASE_PATH)/mvnw --batch-mode --errors --fail-at-end --update-snapshots -f ${BASE_PATH}/pom.xml clean package -DskipTests=$(SKIP_TEST)
 	@printf "${BLUE}📁 复制制品到项目根目录...${RESET}\n"
 	@mkdir -p ${BASE_PATH}/target
-	@cp -f ${BASE_PATH}/mingsha-jvm-assembly/target/*.tar.gz ${BASE_PATH}/target/ 2>/dev/null || true
-	@cp -f ${BASE_PATH}/mingsha-jvm-assembly/target/*.zip ${BASE_PATH}/target/ 2>/dev/null || true
+	@cp -f ${BASE_PATH}/mingsha-jvm-assembly/target/mingsha-jvm-1.0.0-bin.tar.gz ${BASE_PATH}/target/ 2>/dev/null || true
+	@cp -f ${BASE_PATH}/mingsha-jvm-assembly/target/mingsha-jvm-1.0.0-bin.zip ${BASE_PATH}/target/ 2>/dev/null || true
 	@printf "${BLUE}🔐 生成SHA256校验和...${RESET}\n"
 	@cd ${BASE_PATH}/target && sha256sum *.tar.gz *.zip > SHA256SUMS.txt 2>/dev/null || true
 	@printf "\n"

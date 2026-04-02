@@ -134,15 +134,15 @@ After running `make package`, the distribution packages will be created in `targ
 
 ```
 target/
-├── mingsha-jvm-1.0.0-SNAPSHOT-bin.tar.gz    # ✅ Distribution package (tar.gz)
-├── mingsha-jvm-1.0.0-SNAPSHOT-bin.zip         # ✅ Distribution package (zip)
+├── mingsha-jvm-1.0.0-bin.tar.gz    # ✅ Distribution package (tar.gz)
+├── mingsha-jvm-1.0.0-bin.zip         # ✅ Distribution package (zip)
 └── SHA256SUMS.txt                              # ✅ SHA256 checksums
 ```
 
 **Extract and run:**
 ```bash
-tar -xzf mingsha-jvm-1.0.0-SNAPSHOT-bin.tar.gz
-cd mingsha-jvm-1.0.0-SNAPSHOT
+tar -xzf mingsha-jvm-1.0.0-bin.tar.gz
+cd mingsha-jvm-1.0.0
 ./bin/java HelloWorld
 ```
 
