@@ -10,7 +10,7 @@
 
 ## 📋 Overview
 
-**Mingsha JVM** (mingsha JVM) is a professional-grade Java Virtual Machine implementation written in pure Java. It is designed to demonstrate core JVM concepts while maintaining production-quality code standards.
+**mingsha-jvm** is a professional-grade Java Virtual Machine implementation written in pure Java. It is designed to demonstrate core JVM concepts while maintaining production-quality code standards.
 
 ---
 
@@ -128,51 +128,42 @@ mingsha-jvm/
 
 ---
 
-## 📦 Distribution Structure
+## 📦 Distribution
 
-After running `make package`, the distribution will be created:
+After running `make package`, the distribution packages will be created in `target/`:
 
 ```
-mingsha-jvm-1.0.0-SNAPSHOT/
-├── bin/
-│   └── java                   # ✅ JVM launcher
-├── boot/
-│   └── mingsha-jvm-boot-*.jar
-├── conf/
-│   ├── jvm.properties         # ✅ JVM configuration
-│   └── log.properties         # ✅ Logging configuration
-├── lib/
-│   ├── mingsha-jvm-core-*.jar        # ✅
-│   ├── mingsha-jvm-classloader-*.jar # ✅
-│   ├── mingsha-jvm-runtime-*.jar     # ✅
-│   ├── mingsha-jvm-interpreter-*.jar  # ✅
-│   ├── mingsha-jvm-jit-*.jar         # ✅
-│   ├── mingsha-jvm-gc-*.jar          # ✅
-│   ├── mingsha-jvm-native-*.jar      # ✅
-│   ├── mingsha-jvm-tools-*.jar       # ✅
-│   └── slf4j-api-*.jar
-├── README.md
-├── NOTICE
-└── LICENSE
+target/
+├── mingsha-jvm-1.0.0-SNAPSHOT-bin.tar.gz    # ✅ Distribution package (tar.gz)
+├── mingsha-jvm-1.0.0-SNAPSHOT-bin.zip         # ✅ Distribution package (zip)
+└── SHA256SUMS.txt                              # ✅ SHA256 checksums
+```
+
+**Extract and run:**
+```bash
+tar -xzf mingsha-jvm-1.0.0-SNAPSHOT-bin.tar.gz
+cd mingsha-jvm-1.0.0-SNAPSHOT
+./bin/java HelloWorld
 ```
 
 ---
 
 ## 🎯 Makefile Targets
 
-| Target | Description | Emoji |
-|--------|-------------|-------|
-| `make help` | Display this help message | ❓ |
-| `make clean` | Clean build artifacts | 🧹 |
-| `make compile` | Compile all modules | ⚙️ |
-| `make test` | Run unit tests | 🧪 |
-| `make test-l4` | Run L4 test suite | 🧪 |
-| `make install` | Install to local repository | 📦 |
-| `make package` | Build distribution packages | 📦 |
-| `make verify` | Full verification (clean + compile + test + package) | ✅ |
-| `make hello` | HelloWorld bootstrap test | 🚀 |
-| `make run-all-tests` | Run all acceptance tests (L1 + L4) | 🧪 |
-| `make quick` | Quick build (clean + compile only) | ⚡ |
+| Target | Description |
+|--------|-------------|
+| ❓ make help | Display this help message |
+| 🧹 make clean | Clean build artifacts |
+| ⚙️ make compile | Compile all modules |
+| 🧪 make test | Run unit tests |
+| 🧪 make test-l4 | Run L4 test suite |
+| 📦 make install | Install to local repository |
+| 📦 make package | Build distribution packages |
+| 🔐 make sha256 | Generate SHA256 checksums |
+| ✅ make verify | Full verification (clean + compile + test + package) |
+| 🚀 make hello | HelloWorld bootstrap test |
+| 🧪 make run-all-tests | Run all acceptance tests (L1 + L4) |
+| ⚡ make quick | Quick build (clean + compile only) |
 
 ---
 

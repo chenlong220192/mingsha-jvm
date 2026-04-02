@@ -32,6 +32,8 @@
                         <phase>package</phase>
                         <goals><goal>single</goal></goals>
                         <configuration>
+                            <finalName>mingsha-jvm-${project.version}-bin</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
                             <tarLongFileMode>posix</tarLongFileMode>
                             <descriptors>
                                 <descriptor>src/main/assembly/bin.xml</descriptor>

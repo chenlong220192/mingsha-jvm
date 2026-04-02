@@ -94,28 +94,13 @@ mingsha-jvm/
 
 ## 📦 制品包结构
 
+运行 `make package` 后，制品包将生成在 `target/` 目录：
+
 ```
-mingsha-jvm-1.0.0-SNAPSHOT/
-├── bin/
-│   └── java                   # ✅ 启动脚本
-├── boot/
-│   └── mingsha-jvm-boot-*.jar
-├── conf/
-│   ├── jvm.properties        # ✅ JVM 配置
-│   └── log.properties        # ✅ 日志配置
-├── lib/
-│   ├── mingsha-jvm-core-*.jar        # ✅
-│   ├── mingsha-jvm-classloader-*.jar # ✅
-│   ├── mingsha-jvm-runtime-*.jar     # ✅
-│   ├── mingsha-jvm-interpreter-*.jar  # ✅
-│   ├── mingsha-jvm-jit-*.jar         # ✅
-│   ├── mingsha-jvm-gc-*.jar          # ✅
-│   ├── mingsha-jvm-native-*.jar      # ✅
-│   ├── mingsha-jvm-tools-*.jar       # ✅
-│   └── slf4j-api-*.jar
-├── README.md
-├── NOTICE
-└── LICENSE
+target/
+├── mingsha-jvm-1.0.0-SNAPSHOT-bin.tar.gz    # ✅ 发行版包 (tar.gz)
+├── mingsha-jvm-1.0.0-SNAPSHOT-bin.zip         # ✅ 发行版包 (zip)
+└── SHA256SUMS.txt                              # ✅ SHA256 校验和
 ```
 
 ---

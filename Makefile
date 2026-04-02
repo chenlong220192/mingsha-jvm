@@ -55,7 +55,7 @@ help: ## ❓ 显示帮助信息
 	@printf "\n"
 	@printf "${BOLD}${YELLOW}%-8s:${RESET}\n" "可用目标"
 	@awk 'BEGIN {FS = ":.*?## "; max=22} /^[a-zA-Z0-9_.-]+:.*?## / {cmd=$$1; desc=$$2; printf "  ${GREEN}%-*s${RESET} %s\n", max, cmd, desc}' max=22 $(MAKEFILE_LIST) | \
-		sed 's/\$$(HELP)/$(HELP)/g' | sed 's/\$$(CLEAN)/$(CLEAN)/g' | sed 's/\$$(TEST)/$(TEST)/g' | sed 's/\$$(PACKAGE)/$(PACKAGE)/g' | sed 's/\$$(GEAR)/$(GEAR)/g' | sed 's/\$$(INFO)/$(INFO)/g'
+		sed 's/\$$(HELP)/$(HELP)/g' | sed 's/\$$(CLEAN)/$(CLEAN)/g' | sed 's/\$$(TEST)/$(TEST)/g' | sed 's/\$$(PACKAGE)/$(PACKAGE)/g' | sed 's/\$$(GEAR)/$(GEAR)/g' | sed 's/\$$(INFO)/$(INFO)/g' | sed 's/\$$(ROCKET)/$(ROCKET)/g' | sed 's/\$$(SUCCESS)/$(SUCCESS)/g'
 	@printf "\n"
 	@printf "${BOLD}${YELLOW}%-8s:${RESET}\n" "示例"
 	@printf "  ${GREEN}%-22s${RESET} %s\n" "make help" "${HELP} 显示此帮助信息"
@@ -101,10 +101,21 @@ install: ## 📦 安装到本地仓库
 package: ## 📦 构建发行版包
 	@printf "${BLUE}${PACKAGE} 构建发行版包...${RESET}\n"
 	$(BASE_PATH)/mvnw --batch-mode --errors --fail-at-end --update-snapshots -f ${BASE_PATH}/pom.xml clean package -DskipTests=$(SKIP_TEST)
+	@printf "${BLUE}📁 复制制品到项目根目录...${RESET}\n"
+	@mkdir -p ${BASE_PATH}/target
+	@cp -f ${BASE_PATH}/mingsha-jvm-assembly/target/*.tar.gz ${BASE_PATH}/target/ 2>/dev/null || true
+	@cp -f ${BASE_PATH}/mingsha-jvm-assembly/target/*.zip ${BASE_PATH}/target/ 2>/dev/null || true
+	@printf "${BLUE}🔐 生成SHA256校验和...${RESET}\n"
+	@cd ${BASE_PATH}/target && sha256sum *.tar.gz *.zip > SHA256SUMS.txt 2>/dev/null || true
 	@printf "\n"
 	@printf "${GREEN}${INFO} 发行版包已生成：${RESET}\n"
-	@ls -lh ${BASE_PATH}/mingsha-jvm-assembly/target/*.zip ${BASE_PATH}/mingsha-jvm-assembly/target/*.tar.gz 2>/dev/null || echo "  (请检查 target 目录)"
+	@ls -lh ${BASE_PATH}/target/*.tar.gz ${BASE_PATH}/target/*.zip ${BASE_PATH}/target/SHA256SUMS.txt 2>/dev/null || echo "  (请检查 target 目录)"
 	@printf "${GREEN}${SUCCESS} 构建完成！${RESET}\n"
+
+sha256: ## 🔐 生成SHA256校验和
+	@printf "${BLUE}🔐 生成SHA256校验和...${RESET}\n"
+	@cd ${BASE_PATH}/target && sha256sum *.tar.gz *.zip > SHA256SUMS.txt 2>/dev/null || true
+	@printf "${GREEN}${SUCCESS} SHA256校验和已生成！${RESET}\n"
 
 verify: clean compile test package ## ✅ 完整验证
 	@printf "\n"
@@ -134,6 +145,6 @@ run-all-tests: ## 🧪 运行全部验收测试
 	@printf "${BOLD}${GREEN}║                  ${SUCCESS} 全部测试完成！${SUCCESS}                             ║${RESET}\n"
 	@printf "${BOLD}${GREEN}╚════════════════════════════════════════════════════════════════╝${RESET}\n"
 
-quick: clean compile ## 🚀 快速构建
+quick: clean compile ## ⚡ 快速构建
 	@printf "${GREEN}${SUCCESS} 快速构建完成 (跳过测试)${RESET}\n"
 # ----------------------------- build >-----------------------------
