@@ -469,19 +469,19 @@ public final class JVMConstants {
     // ========================================================================
 
     /** Opcode: 0x94 - Compare long */
-    public static final int LCMP = 97;
+    public static final int LCMP = 148;
 
     /** Opcode: 0x95 - Compare float (ordered) */
-    public static final int FCMPL = 98;
+    public static final int FCMPL = 149;
 
     /** Opcode: 0x96 - Compare float (unordered) */
-    public static final int FCMPG = 99;
+    public static final int FCMPG = 150;
 
     /** Opcode: 0x97 - Compare double (ordered) */
-    public static final int DCMPL = 100;
+    public static final int DCMPL = 151;
 
     /** Opcode: 0x98 - Compare double (unordered) */
-    public static final int DCMPG = 101;
+    public static final int DCMPG = 152;
 
     // ========================================================================
     // Bytecode Opcodes - Branch

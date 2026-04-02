@@ -161,6 +161,68 @@ public class LoopInterpreter {
                 frame.setLocalVariableInt(idx, frame.getLocalVariableInt(idx) + c);
             }
 
+            // Bitwise
+            case JVMConstants.ISHL -> {
+                int v2 = frame.popInt();
+                int v1 = frame.popInt();
+                frame.pushInt(v1 << v2);
+            }
+            case JVMConstants.ISHR -> {
+                int v2 = frame.popInt();
+                int v1 = frame.popInt();
+                frame.pushInt(v1 >> v2);
+            }
+            case JVMConstants.IUSHR -> {
+                int v2 = frame.popInt();
+                int v1 = frame.popInt();
+                frame.pushInt(v1 >>> v2);
+            }
+            case JVMConstants.IAND -> {
+                int v2 = frame.popInt();
+                int v1 = frame.popInt();
+                frame.pushInt(v1 & v2);
+            }
+            case JVMConstants.IOR -> {
+                int v2 = frame.popInt();
+                int v1 = frame.popInt();
+                frame.pushInt(v1 | v2);
+            }
+            case JVMConstants.IXOR -> {
+                int v2 = frame.popInt();
+                int v1 = frame.popInt();
+                frame.pushInt(v1 ^ v2);
+            }
+            case JVMConstants.LSHL -> {
+                int v2 = frame.popInt();
+                long v1 = frame.popLong();
+                frame.pushLong(v1 << v2);
+            }
+            case JVMConstants.LSHR -> {
+                int v2 = frame.popInt();
+                long v1 = frame.popLong();
+                frame.pushLong(v1 >> v2);
+            }
+            case JVMConstants.LUSHR -> {
+                int v2 = frame.popInt();
+                long v1 = frame.popLong();
+                frame.pushLong(v1 >>> v2);
+            }
+            case JVMConstants.LAND -> {
+                long v2 = frame.popLong();
+                long v1 = frame.popLong();
+                frame.pushLong(v1 & v2);
+            }
+            case JVMConstants.LOR -> {
+                long v2 = frame.popLong();
+                long v1 = frame.popLong();
+                frame.pushLong(v1 | v2);
+            }
+            case JVMConstants.LXOR -> {
+                long v2 = frame.popLong();
+                long v1 = frame.popLong();
+                frame.pushLong(v1 ^ v2);
+            }
+
             // Comparison
             case JVMConstants.IFEQ -> { int offset = reader.readShort(); if (frame.popInt() == 0) reader.skip(offset - 3); }
             case JVMConstants.IFNE -> { int offset = reader.readShort(); if (frame.popInt() != 0) reader.skip(offset - 3); }
@@ -168,6 +230,47 @@ public class LoopInterpreter {
             case JVMConstants.IFGE -> { int offset = reader.readShort(); if (frame.popInt() >= 0) reader.skip(offset - 3); }
             case JVMConstants.IFGT -> { int offset = reader.readShort(); if (frame.popInt() > 0) reader.skip(offset - 3); }
             case JVMConstants.IFLE -> { int offset = reader.readShort(); if (frame.popInt() <= 0) reader.skip(offset - 3); }
+
+            // Comparison with branches
+            case JVMConstants.LCMP -> {
+                long v2 = frame.popLong();
+                long v1 = frame.popLong();
+                frame.pushInt(v1 > v2 ? 1 : (v1 < v2 ? -1 : 0));
+            }
+            case JVMConstants.FCMPL -> {
+                float v2 = ((Float) frame.pop()).floatValue();
+                float v1 = ((Float) frame.pop()).floatValue();
+                frame.pushInt(v1 < v2 ? -1 : (v1 > v2 ? 1 : -1));
+            }
+            case JVMConstants.FCMPG -> {
+                float v2 = ((Float) frame.pop()).floatValue();
+                float v1 = ((Float) frame.pop()).floatValue();
+                frame.pushInt(v1 > v2 ? 1 : (v1 < v2 ? -1 : 1));
+            }
+            case JVMConstants.DCMPL -> {
+                double v2 = ((Double) frame.pop()).doubleValue();
+                double v1 = ((Double) frame.pop()).doubleValue();
+                frame.pushInt(v1 < v2 ? -1 : (v1 > v2 ? 1 : -1));
+            }
+            case JVMConstants.DCMPG -> {
+                double v2 = ((Double) frame.pop()).doubleValue();
+                double v1 = ((Double) frame.pop()).doubleValue();
+                frame.pushInt(v1 > v2 ? 1 : (v1 < v2 ? -1 : 1));
+            }
+
+            // Type conversion
+            case JVMConstants.I2L -> frame.pushLong((long) frame.popInt());
+            case JVMConstants.I2F -> frame.push(Float.valueOf((float) frame.popInt()));
+            case JVMConstants.I2D -> frame.push(Double.valueOf((double) frame.popInt()));
+            case JVMConstants.L2I -> frame.pushInt((int) frame.popLong());
+            case JVMConstants.L2F -> frame.push(Float.valueOf((float) frame.popLong()));
+            case JVMConstants.L2D -> frame.push(Double.valueOf((double) frame.popLong()));
+            case JVMConstants.F2I -> frame.pushInt((int) ((Float) frame.pop()).floatValue());
+            case JVMConstants.F2L -> frame.pushLong((long) ((Float) frame.pop()).floatValue());
+            case JVMConstants.F2D -> frame.push(Double.valueOf((double) ((Float) frame.pop()).floatValue()));
+            case JVMConstants.D2I -> frame.pushInt((int) ((Double) frame.pop()).doubleValue());
+            case JVMConstants.D2L -> frame.pushLong((long) ((Double) frame.pop()).doubleValue());
+            case JVMConstants.D2F -> frame.push(Float.valueOf((float) ((Double) frame.pop()).doubleValue()));
 
             // Control
             case JVMConstants.GOTO -> reader.skip(reader.readShort() - 3);
