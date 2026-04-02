@@ -49,7 +49,7 @@
 | L1: 单元测试 | ✅ | 103 tests passing |
 | L2: 集成测试 | ✅ | All modules compile |
 | L3: HelloWorld | ✅ | 输出 "Hello, World!" |
-| L4: 测试套件 | ⏳ | 待完整字节码支持 |
+| L4: 测试套件 | ✅ | 5 tests (Arithmetic, Conditional, Loop, MethodCall, FieldAccess) |
 
 ---
 

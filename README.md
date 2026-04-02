@@ -156,7 +156,7 @@ mingsha-jvm-1.0.0-SNAPSHOT/
 | L1 | Unit Tests | ✅ 103 tests passing |
 | L2 | Integration Tests | ✅ All modules compile |
 | L3 | Bootstrap Test | ✅ HelloWorld executes |
-| L4 | Test Suite | ⏳ Pending full bytecode support |
+| L4 | Test Suite | ✅ 5 tests (Arithmetic, Conditional, Loop, MethodCall, FieldAccess) |
 
 ## License
 
