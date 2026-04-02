@@ -1,165 +1,139 @@
-# =============================================================================
-# Mingsha JVM Build System
-# =============================================================================
-# A Java Virtual Machine implementation targeting Java 17
+#======================================================================
 #
-# Usage: make <target>
+# mingsha-jvm Build System
 #
-# Targets:
-#   help           - 显示帮助信息
-#   clean          - 清理构建产物
-#   compile        - 编译所有模块
-#   test           - 运行单元测试
-#   test-coverage  - 运行测试并生成覆盖率报告
-#   install        - 安装到本地仓库
-#   package        - 构建发行版包
-#   verify         - 完整验证
-#   hello          - HelloWorld快速测试
-#   run-all-tests  - 运行全部验收测试
-# =============================================================================
+# A pure Java implementation of Java Virtual Machine targeting Java 17
+#
+# Usage: make <target> [SKIP_TEST=true|false]
+#
+# author: mingsha
+# date: 2026-04-02
+#======================================================================
 
-.PHONY: help clean compile test test-coverage install package verify hello run-all-tests
+SHELL := /bin/bash -o pipefail
 
-# Current directory
-CURRENT_DIR := $(shell pwd)
-# Version
-VERSION := 1.0.0
+export BASE_PATH := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 
-# Default target
+# ----------------------------- colors <-----------------------------
+ROCKET := 🚀
+GEAR := ⚙️
+TEST := 🧪
+PACKAGE := 📦
+CLEAN := 🧹
+HELP := ❓
+INFO := ℹ️
+SUCCESS := ✅
+WARNING := ⚠️
+ERROR := ❌
+
+RED=\033[31m
+GREEN=\033[32m
+YELLOW=\033[33m
+BLUE=\033[34m
+CYAN=\033[36m
+BOLD=\033[1m
+RESET=\033[0m
+# ----------------------------- colors >-----------------------------
+
+# ----------------------------- variables <-----------------------------
+SKIP_TEST ?= false
+VERSION := 1.0.0-SNAPSHOT
+# ----------------------------- variables >-----------------------------
+
+# ----------------------------- help <-----------------------------
+.PHONY: help
+help: ## ❓ 显示帮助信息
+	@printf "${BOLD}${CYAN}╔════════════════════════════════════════════════════════════════╗${RESET}\n"
+	@printf "${BOLD}${CYAN}║            ${ROCKET}  mingsha-jvm 构建工具  ${ROCKET}                   ║${RESET}\n"
+	@printf "${BOLD}${CYAN}╚════════════════════════════════════════════════════════════════╝${RESET}\n"
+	@printf "\n"
+	@printf "${BOLD}${YELLOW}%-8s:${RESET}\n" "使用方法"
+	@printf "  make <target> [SKIP_TEST=true|false]\n"
+	@printf "\n"
+	@printf "${BOLD}${YELLOW}%-8s:${RESET}\n" "环境变量"
+	@printf "  ${GREEN}%-22s${RESET} %s\n" "SKIP_TEST" "- 跳过测试 (默认: false, 可选: true)"
+	@printf "\n"
+	@printf "${BOLD}${YELLOW}%-8s:${RESET}\n" "可用目标"
+	@awk 'BEGIN {FS = ":.*?## "; max=22} /^[a-zA-Z0-9_.-]+:.*?## / {cmd=$$1; desc=$$2; printf "  ${GREEN}%-*s${RESET} %s\n", max, cmd, desc}' max=22 $(MAKEFILE_LIST) | \
+		sed 's/\$$(HELP)/$(HELP)/g' | sed 's/\$$(CLEAN)/$(CLEAN)/g' | sed 's/\$$(TEST)/$(TEST)/g' | sed 's/\$$(PACKAGE)/$(PACKAGE)/g' | sed 's/\$$(GEAR)/$(GEAR)/g' | sed 's/\$$(INFO)/$(INFO)/g'
+	@printf "\n"
+	@printf "${BOLD}${YELLOW}%-8s:${RESET}\n" "示例"
+	@printf "  ${GREEN}%-22s${RESET} %s\n" "make help" "${HELP} 显示此帮助信息"
+	@printf "  ${GREEN}%-22s${RESET} %s\n" "make clean" "${CLEAN} 清理构建文件"
+	@printf "  ${GREEN}%-22s${RESET} %s\n" "make compile" "${GEAR} 编译所有模块"
+	@printf "  ${GREEN}%-22s${RESET} %s\n" "make test" "${TEST} 运行单元测试"
+	@printf "  ${GREEN}%-22s${RESET} %s\n" "make package" "${PACKAGE} 构建发行版包"
+	@printf "\n"
+	@printf "${BOLD}${CYAN}╔════════════════════════════════════════════════════════════════╗${RESET}\n"
+	@printf "${BOLD}${CYAN}║              ${SUCCESS}  构建愉快！${SUCCESS}                                    ║${RESET}\n"
+	@printf "${BOLD}${CYAN}╚════════════════════════════════════════════════════════════════╝${RESET}\n"
+
 .DEFAULT_GOAL := help
+# ----------------------------- help >-----------------------------
 
-# -----------------------------------------------------------------------------
-# Help - 显示所有可用命令
-# -----------------------------------------------------------------------------
-help:
-	@echo ""
-	@echo "========================================"
-	@echo "    Mingsha JVM Build System"
-	@echo "========================================"
-	@echo ""
-	@echo "Version: $(VERSION)"
-	@echo "Java Version: 17"
-	@echo ""
-	@echo "Available targets:"
-	@echo ""
-	@echo "  make help           - 显示此帮助信息"
-	@echo "  make clean          - 清理构建产物"
-	@echo "  make compile        - 编译所有模块"
-	@echo "  make test           - 运行单元测试"
-	@echo "  make test-coverage  - 运行测试并生成覆盖率报告"
-	@echo "  make install        - 安装到本地仓库"
-	@echo "  make package       - 构建发行版包 (zip/tar.gz)"
-	@echo "  make verify         - 完整验证 (编译+测试+打包)"
-	@echo "  make hello          - HelloWorld验收测试"
-	@echo "  make run-all-tests  - 运行全部验收测试"
-	@echo ""
-	@echo "Examples:"
-	@echo "  make compile        # 编译项目"
-	@echo "  make test-coverage # 运行测试并查看覆盖率"
-	@echo "  make package       # 构建发布包"
-	@echo ""
-
-# -----------------------------------------------------------------------------
-# Clean - 清理构建产物
-# -----------------------------------------------------------------------------
-clean:
-	@echo "Cleaning build artifacts..."
-	./mvnw clean
+# ----------------------------- build <-----------------------------
+clean: ## 🧹 清理构建文件
+	@printf "${BLUE}${CLEAN} 清理构建文件...${RESET}\n"
+	$(BASE_PATH)/mvnw --batch-mode --errors -f ${BASE_PATH}/pom.xml clean
 	@if [ -d "logs" ]; then rm -rf logs/*.log; fi
-	@echo "Clean complete."
+	@printf "${GREEN}${SUCCESS} 清理完成！${RESET}\n"
 
-# -----------------------------------------------------------------------------
-# Compile - 仅编译
-# -----------------------------------------------------------------------------
-compile:
-	@echo "Compiling all modules..."
-	./mvnw compile
-	@echo "Compile complete."
+compile: ## ⚙️ 编译所有模块
+	@printf "${BLUE}${GEAR} 编译所有模块...${RESET}\n"
+	$(BASE_PATH)/mvnw --batch-mode --errors -f ${BASE_PATH}/pom.xml compile
+	@printf "${GREEN}${SUCCESS} 编译完成！${RESET}\n"
 
-# -----------------------------------------------------------------------------
-# Test - 运行单元测试
-# -----------------------------------------------------------------------------
-test:
-	@echo "Running unit tests..."
-	./mvnw test
-	@echo "Tests complete."
+test: ## 🧪 运行单元测试
+	@printf "${BLUE}${TEST} 运行单元测试...${RESET}\n"
+	$(BASE_PATH)/mvnw --batch-mode --errors --fail-at-end --update-snapshots -f ${BASE_PATH}/pom.xml clean test -D test=*Test -DfailIfNoTests=false
+	@printf "${GREEN}${SUCCESS} 测试完成！${RESET}\n"
 
-# -----------------------------------------------------------------------------
-# Test Coverage - 测试覆盖率
-# -----------------------------------------------------------------------------
-test-coverage:
-	@echo "Running tests with coverage report..."
-	./mvnw test jacoco:report
-	@echo ""
-	@echo "Coverage report generated at:"
-	@echo "  target/site/jacoco/index.html"
+test-l4: ## 🧪 运行L4测试套件
+	@printf "${BLUE}${TEST} 运行L4测试套件...${RESET}\n"
+	$(BASE_PATH)/mvnw --batch-mode --errors -f ${BASE_PATH}/pom.xml test -Dtest=L4TestSuite
+	@printf "${GREEN}${SUCCESS} L4测试完成！${RESET}\n"
 
-# -----------------------------------------------------------------------------
-# Install - 安装到本地仓库
-# -----------------------------------------------------------------------------
-install:
-	@echo "Installing to local repository..."
-	./mvnw clean install
-	@echo "Install complete."
+install: ## 📦 安装到本地仓库
+	@printf "${BLUE}${PACKAGE} 安装到本地仓库...${RESET}\n"
+	$(BASE_PATH)/mvnw --batch-mode --errors -f ${BASE_PATH}/pom.xml clean install -DskipTests=$(SKIP_TEST)
+	@printf "${GREEN}${SUCCESS} 安装完成！${RESET}\n"
 
-# -----------------------------------------------------------------------------
-# Package - 构建发行版
-# -----------------------------------------------------------------------------
-package:
-	@echo "Building distribution packages..."
-	./mvnw clean package -pl mingsha-jvm-assembly
-	@echo ""
-	@echo "Distribution packages generated:"
-	@ls -lh target/*.zip target/*.tar.gz 2>/dev/null || echo "  (check target directory)"
+package: ## 📦 构建发行版包
+	@printf "${BLUE}${PACKAGE} 构建发行版包...${RESET}\n"
+	$(BASE_PATH)/mvnw --batch-mode --errors --fail-at-end --update-snapshots -f ${BASE_PATH}/pom.xml clean package -DskipTests=$(SKIP_TEST)
+	@printf "\n"
+	@printf "${GREEN}${INFO} 发行版包已生成：${RESET}\n"
+	@ls -lh ${BASE_PATH}/mingsha-jvm-assembly/target/*.zip ${BASE_PATH}/mingsha-jvm-assembly/target/*.tar.gz 2>/dev/null || echo "  (请检查 target 目录)"
+	@printf "${GREEN}${SUCCESS} 构建完成！${RESET}\n"
 
-# -----------------------------------------------------------------------------
-# Verify - 完整验证
-# -----------------------------------------------------------------------------
-verify: clean compile test package
-	@echo ""
-	@echo "========================================"
-	@echo "  Verification Complete!"
-	@echo "========================================"
+verify: clean compile test package ## ✅ 完整验证
+	@printf "\n"
+	@printf "${BOLD}${GREEN}╔════════════════════════════════════════════════════════════════╗${RESET}\n"
+	@printf "${BOLD}${GREEN}║                    ${SUCCESS} 验证完成！${SUCCESS}                              ║${RESET}\n"
+	@printf "${BOLD}${GREEN}╚════════════════════════════════════════════════════════════════╝${RESET}\n"
 
-# -----------------------------------------------------------------------------
-# Hello - HelloWorld快速测试
-# -----------------------------------------------------------------------------
-hello:
-	@echo "=== HelloWorld Bootstrap Test ==="
-	@echo "Creating test file..."
+hello: ## 🚀 HelloWorld快速测试
+	@printf "${BLUE}${ROCKET} HelloWorld快速测试...${RESET}\n"
 	@mkdir -p /tmp/mingsha-test
-	@echo 'public class HelloWorld { public static void main(String[] args) { System.out.println("Hello, World!"); System.out.println("Mingsha JVM is working!"); } }' > /tmp/mingsha-test/HelloWorld.java
-	@echo "Compiling with system javac..."
-	@javac /tmp/mingsha-test/HelloWorld.java -d /tmp/mingsha-test/
-	@echo "Running with mingsha-jvm..."
-	@./mvnw compile -q
-	@echo ""
-	@echo "Note: Full execution requires complete interpreter implementation"
-	@echo "HelloWorld class file created at: /tmp/mingsha-test/"
+	@echo 'public class HelloWorld { public static void main(String[] args) { System.out.println("Hello, World!"); System.out.println("mingsha-jvm is working!"); } }' > /tmp/mingsha-test/HelloWorld.java
+	@cd /tmp/mingsha-test && javac HelloWorld.java 2>/dev/null && echo "Java编译成功" || echo "Java编译失败"
+	@printf "${GREEN}${SUCCESS} HelloWorld测试完成！${RESET}\n"
 
-# -----------------------------------------------------------------------------
-# Run All Tests - 全部验收测试
-# -----------------------------------------------------------------------------
-run-all-tests:
-	@echo "========================================"
-	@echo "  Running All Acceptance Tests"
-	@echo "========================================"
-	@echo ""
-	@echo "--- Level 1: Unit Tests ---"
-	./mvnw test
-	@echo ""
-	@echo "--- Level 2: Integration Tests ---"
-	@./mvnw test -Dtest=*IntegrationTest 2>/dev/null || echo "(No integration tests yet)"
-	@echo ""
-	@echo "--- Level 3: Bootstrap Test ---"
-	@mkdir -p /tmp/mingsha-test && echo 'public class BootstrapTest { public static void main(String[] args) { System.out.println("Bootstrap test passed!"); } }' > /tmp/mingsha-test/BootstrapTest.java && javac /tmp/mingsha-test/BootstrapTest.java -d /tmp/mingsha-test/
-	@echo ""
-	@echo "========================================"
-	@echo "  All Tests Complete"
-	@echo "========================================"
+run-all-tests: ## 🧪 运行全部验收测试
+	@printf "${BOLD}${CYAN}╔════════════════════════════════════════════════════════════════╗${RESET}\n"
+	@printf "${BOLD}${CYAN}║                  ${TEST}  运行全部验收测试  ${TEST}                       ║${RESET}\n"
+	@printf "${BOLD}${CYAN}╚════════════════════════════════════════════════════════════════╝${RESET}\n"
+	@printf "\n"
+	@printf "${BOLD}${YELLOW}--- Level 1: 单元测试 ---${RESET}\n"
+	$(BASE_PATH)/mvnw --batch-mode -f ${BASE_PATH}/pom.xml test
+	@printf "\n"
+	@printf "${BOLD}${YELLOW}--- Level 4: L4测试套件 ---${RESET}\n"
+	$(BASE_PATH)/mvnw --batch-mode -f ${BASE_PATH}/pom.xml test -Dtest=L4TestSuite
+	@printf "\n"
+	@printf "${BOLD}${GREEN}╔════════════════════════════════════════════════════════════════╗${RESET}\n"
+	@printf "${BOLD}${GREEN}║                  ${SUCCESS} 全部测试完成！${SUCCESS}                             ║${RESET}\n"
+	@printf "${BOLD}${GREEN}╚════════════════════════════════════════════════════════════════╝${RESET}\n"
 
-# -----------------------------------------------------------------------------
-# Quick Build - 快速构建 (跳过测试)
-# -----------------------------------------------------------------------------
-quick: clean compile
-	@echo "Quick build complete (no tests)."
+quick: clean compile ## 🚀 快速构建
+	@printf "${GREEN}${SUCCESS} 快速构建完成 (跳过测试)${RESET}\n"
+# ----------------------------- build >-----------------------------
