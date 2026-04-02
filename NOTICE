@@ -1,2 +1,113 @@
 Mingsha JVM
 Copyright (c) 2026 Mingsha
+
+This product includes software developed by the following projects:
+
+================================================================================
+
+Third-Party Software Licenses
+================================================================================
+
+This project uses the following open source components. Their respective
+licenses are listed below.
+
+================================================================================
+
+1. OpenJDK Project
+--------------------------------------------------------------------------------
+License: GNU General Public License, version 2, with the Classpath Exception
+URL: https://openjdk.org/
+Notes: This project references the OpenJDK specification for JVM behavior.
+       The Classpath Exception allows this code to be linked with independent
+       modules without requiring those modules to be released under GPL v2.
+
+For full license text, see: https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
+
+================================================================================
+
+2. Apache Maven
+--------------------------------------------------------------------------------
+License: Apache License, Version 2.0
+URL: https://maven.apache.org/
+Notes: Apache Maven is used as the build system.
+
+For full license text, see: https://www.apache.org/licenses/LICENSE-2.0
+
+================================================================================
+
+3. SLF4J (Simple Logging Facade for Java)
+--------------------------------------------------------------------------------
+License: MIT License
+URL: https://www.slf4j.org/
+Notes: SLF4J is used for logging throughout the JVM implementation.
+
+For full license text, see: https://www.slf4j.org/license.html
+
+================================================================================
+
+4. Logback
+--------------------------------------------------------------------------------
+License: Eclipse Public License 1.0 / LGPL 2.1
+URL: https://logback.qos.ch/
+Notes: Logback is the logging implementation used by SLF4J.
+
+For full license text, see: https://logback.qos.ch/license.html
+
+================================================================================
+
+5. JUnit 5 (JUnit Jupiter)
+--------------------------------------------------------------------------------
+License: Eclipse Public License 2.0
+URL: https://junit.org/junit5/
+Notes: JUnit 5 is used as the testing framework for unit tests.
+
+For full license text, see: https://www.eclipse.org/legal/epl-v20.html
+
+================================================================================
+
+6. Mockito
+--------------------------------------------------------------------------------
+License: MIT License
+URL: https://site.mockito.org/
+Notes: Mockito is used for creating mock objects in unit tests.
+
+For full license text: https://github.com/mockito/mockito/blob/main/LICENSE
+
+================================================================================
+
+7. JaCoCo (Java Code Coverage Library)
+--------------------------------------------------------------------------------
+License: Eclipse Public License 2.0
+URL: https://www.eclemma.org/jacoco/
+Notes: JaCoCo is used for code coverage analysis.
+
+For full license text: https://www.eclemma.org/jacoco/trunk/doc/license.html
+
+================================================================================
+
+8. Byte Buddy
+--------------------------------------------------------------------------------
+License: Apache License, Version 2.0
+URL: https://bytebuddy.net/
+Notes: Byte Buddy is a runtime code generation library used by Mockito.
+
+For full license text: https://bytebuddy.net/license.html
+
+================================================================================
+
+Classpath Exception
+================================================================================
+
+As a special exception to the GPL v2 license terms, the authors of this
+software grant permission to link this software with independent modules
+to produce an executable, regardless of the license terms of these independent
+modules, and to copy and distribute the resulting executable.
+
+This means that applications and libraries built on top of this JVM
+implementation are not required to be released under GPL v2. Only the
+JVM implementation itself falls under GPL v2.
+
+================================================================================
+
+End of NOTICE
+================================================================================
