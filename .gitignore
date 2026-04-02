@@ -29,6 +29,13 @@ Thumbs.db
 # Test
 test-output/
 surefire-reports/
+jacoco.exec
+
+# JVM crash logs
+hs_err_pid*.log
+
+# Merge conflict backups
+*.orig
 
 # Maven wrapper (downloaded, not needed in repo)
 mvn/
