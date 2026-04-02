@@ -99,8 +99,7 @@ mingsha-jvm/
 ```
 target/
 ├── mingsha-jvm-1.0.0-bin.tar.gz    # ✅ 发行版包 (tar.gz)
-├── mingsha-jvm-1.0.0-bin.zip         # ✅ 发行版包 (zip)
-└── SHA256SUMS.txt                              # ✅ SHA256 校验和
+└── mingsha-jvm-1.0.0-bin.zip         # ✅ 发行版包 (zip)
 ```
 
 ---

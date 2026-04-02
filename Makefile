@@ -105,17 +105,10 @@ package: ## 📦 构建发行版包
 	@mkdir -p ${BASE_PATH}/target
 	@cp -f ${BASE_PATH}/mingsha-jvm-assembly/target/mingsha-jvm-1.0.0-bin.tar.gz ${BASE_PATH}/target/ 2>/dev/null || true
 	@cp -f ${BASE_PATH}/mingsha-jvm-assembly/target/mingsha-jvm-1.0.0-bin.zip ${BASE_PATH}/target/ 2>/dev/null || true
-	@printf "${BLUE}🔐 生成SHA256校验和...${RESET}\n"
-	@cd ${BASE_PATH}/target && sha256sum *.tar.gz *.zip > SHA256SUMS.txt 2>/dev/null || true
 	@printf "\n"
 	@printf "${GREEN}${INFO} 发行版包已生成：${RESET}\n"
-	@ls -lh ${BASE_PATH}/target/*.tar.gz ${BASE_PATH}/target/*.zip ${BASE_PATH}/target/SHA256SUMS.txt 2>/dev/null || echo "  (请检查 target 目录)"
+	@ls -lh ${BASE_PATH}/target/*.tar.gz ${BASE_PATH}/target/*.zip 2>/dev/null || echo "  (请检查 target 目录)"
 	@printf "${GREEN}${SUCCESS} 构建完成！${RESET}\n"
-
-sha256: ## 🔐 生成SHA256校验和
-	@printf "${BLUE}🔐 生成SHA256校验和...${RESET}\n"
-	@cd ${BASE_PATH}/target && sha256sum *.tar.gz *.zip > SHA256SUMS.txt 2>/dev/null || true
-	@printf "${GREEN}${SUCCESS} SHA256校验和已生成！${RESET}\n"
 
 verify: clean compile test package ## ✅ 完整验证
 	@printf "\n"

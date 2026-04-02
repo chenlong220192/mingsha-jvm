@@ -135,8 +135,7 @@ After running `make package`, the distribution packages will be created in `targ
 ```
 target/
 ├── mingsha-jvm-1.0.0-bin.tar.gz    # ✅ Distribution package (tar.gz)
-├── mingsha-jvm-1.0.0-bin.zip         # ✅ Distribution package (zip)
-└── SHA256SUMS.txt                              # ✅ SHA256 checksums
+└── mingsha-jvm-1.0.0-bin.zip         # ✅ Distribution package (zip)
 ```
 
 **Extract and run:**
