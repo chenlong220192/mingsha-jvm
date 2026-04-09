@@ -4,9 +4,9 @@
     <parent>
         <groupId>com.mingsha.jvm</groupId>
         <artifactId>mingsha-jvm</artifactId>
-        <version>1.0.0</version>
+        <version>2026.04.09</version>
     </parent>
-    <artifactId>mingsha-jvm-assembly</artifactId>
+    <artifactId>assembly</artifactId>
     <packaging>pom</packaging>
     <dependencies>
         <dependency><groupId>com.mingsha.jvm</groupId><artifactId>mingsha-jvm-core</artifactId><version>${project.version}</version></dependency>
@@ -35,6 +35,7 @@
                             <finalName>mingsha-jvm-${project.version}-bin</finalName>
                             <appendAssemblyId>false</appendAssemblyId>
                             <tarLongFileMode>posix</tarLongFileMode>
+                            <basedirName>mingsha-jvm-${project.version}</basedirName>
                             <descriptors>
                                 <descriptor>src/main/assembly/bin.xml</descriptor>
                             </descriptors>

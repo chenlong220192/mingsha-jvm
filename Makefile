@@ -103,8 +103,8 @@ package: ## 📦 构建发行版包
 	$(BASE_PATH)/mvnw --batch-mode --errors --fail-at-end --update-snapshots -f ${BASE_PATH}/pom.xml clean package -DskipTests=$(SKIP_TEST)
 	@printf "${BLUE}📁 复制制品到项目根目录...${RESET}\n"
 	@mkdir -p ${BASE_PATH}/target
-	@cp -f ${BASE_PATH}/mingsha-jvm-assembly/target/mingsha-jvm-1.0.0-bin.tar.gz ${BASE_PATH}/target/ 2>/dev/null || true
-	@cp -f ${BASE_PATH}/mingsha-jvm-assembly/target/mingsha-jvm-1.0.0-bin.zip ${BASE_PATH}/target/ 2>/dev/null || true
+	@cp -f ${BASE_PATH}/assembly/target/mingsha-jvm-2026.04.09-bin.tar.gz ${BASE_PATH}/target/ 2>/dev/null || true
+	@cp -f ${BASE_PATH}/assembly/target/mingsha-jvm-2026.04.09-bin.zip ${BASE_PATH}/target/ 2>/dev/null || true
 	@printf "\n"
 	@printf "${GREEN}${INFO} 发行版包已生成：${RESET}\n"
 	@ls -lh ${BASE_PATH}/target/*.tar.gz ${BASE_PATH}/target/*.zip 2>/dev/null || echo "  (请检查 target 目录)"

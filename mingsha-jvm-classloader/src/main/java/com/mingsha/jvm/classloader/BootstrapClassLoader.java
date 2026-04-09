@@ -79,16 +79,20 @@ public class BootstrapClassLoader extends MingshaClassLoader {
 
     @Override
     protected Class<?> findClass(String className) throws ClassNotFoundException {
-        try {
-            loadClassFile(className);
-            return Object.class;
-        } catch (ClassNotFoundException e) {
-            throw e;
-        }
+        ClassFile classFile = loadClassFile(className);
+        // Convert ClassFile to Class<?> - in a real JVM this would define the class
+        // For now, return a marker class or throw UnsupportedOperationException
+        // The actual class definition is handled by the runtime
+        return Object.class;  // Placeholder: real implementation would define the class
     }
 
     @Override
     protected Class<?> findLoadedClass(String className) {
-        return loadedClasses.containsKey(className) ? Object.class : null;
+        if (loadedClasses.containsKey(className)) {
+            // Return a marker class to indicate the class is loaded
+            // Real JVM would return the actual Class object
+            return Object.class;
+        }
+        return null;
     }
 }

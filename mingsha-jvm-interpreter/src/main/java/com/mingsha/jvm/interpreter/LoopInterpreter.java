@@ -111,15 +111,28 @@ public class LoopInterpreter {
             }
 
             case JVMConstants.ILOAD -> frame.pushInt(frame.getLocalVariableInt(reader.readUnsignedByte()));
-            case JVMConstants.LLOAD -> frame.pushLong(frame.popLong());
+            case JVMConstants.LLOAD -> {
+                int idx = reader.readUnsignedByte();
+                frame.pushLong(frame.getLocalVariableLong(idx));
+            }
             case JVMConstants.FLOAD -> frame.push(frame.getLocalVariable(reader.readUnsignedByte()));
-            case JVMConstants.DLOAD -> frame.push(frame.getLocalVariable(reader.readUnsignedByte()));
+            case JVMConstants.DLOAD -> {
+                int idx = reader.readUnsignedByte();
+                frame.push(Double.valueOf(frame.getLocalVariableDouble(idx)));
+            }
             case JVMConstants.ALOAD -> frame.push(frame.getLocalVariable(reader.readUnsignedByte()));
 
             case JVMConstants.ISTORE -> frame.setLocalVariableInt(reader.readUnsignedByte(), frame.popInt());
-            case JVMConstants.LSTORE -> frame.setLocalVariable(reader.readUnsignedByte(), frame.popLong());
+            case JVMConstants.LSTORE -> {
+                int idx = reader.readUnsignedByte();
+                frame.setLocalVariableLong(idx, frame.popLong());
+            }
             case JVMConstants.FSTORE -> frame.setLocalVariable(reader.readUnsignedByte(), frame.pop());
-            case JVMConstants.DSTORE -> frame.setLocalVariable(reader.readUnsignedByte(), frame.pop());
+            case JVMConstants.DSTORE -> {
+                int idx = reader.readUnsignedByte();
+                Object val = frame.pop();
+                frame.setLocalVariableDouble(idx, val instanceof Double ? ((Double) val).doubleValue() : 0.0);
+            }
             case JVMConstants.ASTORE -> frame.setLocalVariable(reader.readUnsignedByte(), frame.pop());
 
             case JVMConstants.POP -> frame.pop();
@@ -129,18 +142,48 @@ public class LoopInterpreter {
 
             case JVMConstants.IADD -> { int v2 = frame.popInt(); int v1 = frame.popInt(); frame.pushInt(v1 + v2); }
             case JVMConstants.LADD -> { long v2 = frame.popLong(); long v1 = frame.popLong(); frame.pushLong(v1 + v2); }
+            case JVMConstants.FADD -> { float v2 = ((Number) frame.pop()).floatValue(); float v1 = ((Number) frame.pop()).floatValue(); frame.push(Float.valueOf(v1 + v2)); }
+            case JVMConstants.DADD -> { double v2 = ((Number) frame.pop()).doubleValue(); double v1 = ((Number) frame.pop()).doubleValue(); frame.push(Double.valueOf(v1 + v2)); }
             case JVMConstants.ISUB -> { int v2 = frame.popInt(); int v1 = frame.popInt(); frame.pushInt(v1 - v2); }
+            case JVMConstants.LSUB -> { long v2 = frame.popLong(); long v1 = frame.popLong(); frame.pushLong(v1 - v2); }
+            case JVMConstants.FSUB -> { float v2 = ((Number) frame.pop()).floatValue(); float v1 = ((Number) frame.pop()).floatValue(); frame.push(Float.valueOf(v1 - v2)); }
+            case JVMConstants.DSUB -> { double v2 = ((Number) frame.pop()).doubleValue(); double v1 = ((Number) frame.pop()).doubleValue(); frame.push(Double.valueOf(v1 - v2)); }
             case JVMConstants.IMUL -> { int v2 = frame.popInt(); int v1 = frame.popInt(); frame.pushInt(v1 * v2); }
+            case JVMConstants.LMUL -> { long v2 = frame.popLong(); long v1 = frame.popLong(); frame.pushLong(v1 * v2); }
+            case JVMConstants.FMUL -> { float v2 = ((Number) frame.pop()).floatValue(); float v1 = ((Number) frame.pop()).floatValue(); frame.push(Float.valueOf(v1 * v2)); }
+            case JVMConstants.DMUL -> { double v2 = ((Number) frame.pop()).doubleValue(); double v1 = ((Number) frame.pop()).doubleValue(); frame.push(Double.valueOf(v1 * v2)); }
             case JVMConstants.IDIV -> {
                 int v2 = frame.popInt();
-                if (v2 == 0) throw new ArithmeticException("division by zero");
-                frame.pushInt(frame.popInt() / v2);
+                if (v2 == 0) throw new ArithmeticException("/ by zero");
+                int v1 = frame.popInt();
+                frame.pushInt(v1 / v2);
             }
+            case JVMConstants.LDIV -> {
+                long v2 = frame.popLong();
+                if (v2 == 0) throw new ArithmeticException("/ by zero");
+                long v1 = frame.popLong();
+                frame.pushLong(v1 / v2);
+            }
+            case JVMConstants.FDIV -> { float v2 = ((Number) frame.pop()).floatValue(); float v1 = ((Number) frame.pop()).floatValue(); frame.push(Float.valueOf(v1 / v2)); }
+            case JVMConstants.DDIV -> { double v2 = ((Number) frame.pop()).doubleValue(); double v1 = ((Number) frame.pop()).doubleValue(); frame.push(Double.valueOf(v1 / v2)); }
             case JVMConstants.IREM -> {
                 int v2 = frame.popInt();
-                if (v2 == 0) throw new ArithmeticException("modulo by zero");
-                frame.pushInt(frame.popInt() % v2);
+                if (v2 == 0) throw new ArithmeticException("% by zero");
+                int v1 = frame.popInt();
+                frame.pushInt(v1 % v2);
             }
+            case JVMConstants.LREM -> {
+                long v2 = frame.popLong();
+                if (v2 == 0) throw new ArithmeticException("% by zero");
+                long v1 = frame.popLong();
+                frame.pushLong(v1 % v2);
+            }
+            case JVMConstants.FREM -> { float v2 = ((Number) frame.pop()).floatValue(); float v1 = ((Number) frame.pop()).floatValue(); frame.push(Float.valueOf(v1 % v2)); }
+            case JVMConstants.DREM -> { double v2 = ((Number) frame.pop()).doubleValue(); double v1 = ((Number) frame.pop()).doubleValue(); frame.push(Double.valueOf(v1 % v2)); }
+            case JVMConstants.INEG -> frame.pushInt(-frame.popInt());
+            case JVMConstants.LNEG -> frame.pushLong(-frame.popLong());
+            case JVMConstants.FNEG -> frame.push(Float.valueOf(-((Number) frame.pop()).floatValue()));
+            case JVMConstants.DNEG -> frame.push(Double.valueOf(-((Number) frame.pop()).doubleValue()));
             case JVMConstants.IINC -> {
                 int idx = reader.readUnsignedByte();
                 int c = reader.readByte();
@@ -160,12 +203,21 @@ public class LoopInterpreter {
             case JVMConstants.LOR -> { long v2 = frame.popLong(); long v1 = frame.popLong(); frame.pushLong(v1 | v2); }
             case JVMConstants.LXOR -> { long v2 = frame.popLong(); long v1 = frame.popLong(); frame.pushLong(v1 ^ v2); }
 
-            case JVMConstants.IFEQ -> { int offset = reader.readShort(); if (frame.popInt() == 0) reader.skip(offset - 3); }
-            case JVMConstants.IFNE -> { int offset = reader.readShort(); if (frame.popInt() != 0) reader.skip(offset - 3); }
-            case JVMConstants.IFLT -> { int offset = reader.readShort(); if (frame.popInt() < 0) reader.skip(offset - 3); }
-            case JVMConstants.IFGE -> { int offset = reader.readShort(); if (frame.popInt() >= 0) reader.skip(offset - 3); }
-            case JVMConstants.IFGT -> { int offset = reader.readShort(); if (frame.popInt() > 0) reader.skip(offset - 3); }
-            case JVMConstants.IFLE -> { int offset = reader.readShort(); if (frame.popInt() <= 0) reader.skip(offset - 3); }
+            // Branch instructions - offset is relative to next instruction
+            case JVMConstants.IFEQ -> { int offset = reader.readShort(); if (frame.popInt() == 0) reader.skip(offset); }
+            case JVMConstants.IFNE -> { int offset = reader.readShort(); if (frame.popInt() != 0) reader.skip(offset); }
+            case JVMConstants.IFLT -> { int offset = reader.readShort(); if (frame.popInt() < 0) reader.skip(offset); }
+            case JVMConstants.IFGE -> { int offset = reader.readShort(); if (frame.popInt() >= 0) reader.skip(offset); }
+            case JVMConstants.IFGT -> { int offset = reader.readShort(); if (frame.popInt() > 0) reader.skip(offset); }
+            case JVMConstants.IFLE -> { int offset = reader.readShort(); if (frame.popInt() <= 0) reader.skip(offset); }
+            case JVMConstants.IF_ICMPEQ -> { int offset = reader.readShort(); int v2 = frame.popInt(); int v1 = frame.popInt(); if (v1 == v2) reader.skip(offset); }
+            case JVMConstants.IF_ICMPNE -> { int offset = reader.readShort(); int v2 = frame.popInt(); int v1 = frame.popInt(); if (v1 != v2) reader.skip(offset); }
+            case JVMConstants.IF_ICMPLT -> { int offset = reader.readShort(); int v2 = frame.popInt(); int v1 = frame.popInt(); if (v1 < v2) reader.skip(offset); }
+            case JVMConstants.IF_ICMPGE -> { int offset = reader.readShort(); int v2 = frame.popInt(); int v1 = frame.popInt(); if (v1 >= v2) reader.skip(offset); }
+            case JVMConstants.IF_ICMPGT -> { int offset = reader.readShort(); int v2 = frame.popInt(); int v1 = frame.popInt(); if (v1 > v2) reader.skip(offset); }
+            case JVMConstants.IF_ICMPLE -> { int offset = reader.readShort(); int v2 = frame.popInt(); int v1 = frame.popInt(); if (v1 <= v2) reader.skip(offset); }
+            case JVMConstants.IF_ACMPEQ -> { int offset = reader.readShort(); Object v2 = frame.pop(); Object v1 = frame.pop(); if (v1 == v2) reader.skip(offset); }
+            case JVMConstants.IF_ACMPNE -> { int offset = reader.readShort(); Object v2 = frame.pop(); Object v1 = frame.pop(); if (v1 != v2) reader.skip(offset); }
 
             case JVMConstants.LCMP -> {
                 long v2 = frame.popLong();
@@ -206,7 +258,7 @@ public class LoopInterpreter {
             case JVMConstants.D2L -> frame.pushLong((long) ((Double) frame.pop()).doubleValue());
             case JVMConstants.D2F -> frame.push(Float.valueOf((float) ((Double) frame.pop()).doubleValue()));
 
-            case JVMConstants.GOTO -> reader.skip(reader.readShort() - 3);
+            case JVMConstants.GOTO -> reader.skip(reader.readShort());
             case JVMConstants.RETURN -> throw new ReturnException(null);
             case JVMConstants.IRETURN -> throw new ReturnException(frame.popInt());
             case JVMConstants.LRETURN -> throw new ReturnException(frame.popLong());

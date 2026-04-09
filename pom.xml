@@ -5,10 +5,11 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.mingsha.jvm</groupId>
     <artifactId>mingsha-jvm</artifactId>
-    <version>1.0.0</version>
+    <version>2026.04.09</version>
     <packaging>pom</packaging>
     <name>Mingsha JVM</name>
     <description>A Java Virtual Machine implementation targeting Java 17</description>
+
     <modules>
         <module>mingsha-jvm-core</module>
         <module>mingsha-jvm-classloader</module>
@@ -19,20 +20,35 @@
         <module>mingsha-jvm-native</module>
         <module>mingsha-jvm-tools</module>
         <module>mingsha-jvm-boot</module>
-        <module>mingsha-jvm-assembly</module>
+        <module>assembly</module>
     </modules>
+
     <properties>
+        <!-- Project -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <!-- Java -->
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <maven.compiler.release>17</maven.compiler.release>
-        <junit.version>5.10.2</junit.version>
-        <mockito.version>5.11.0</mockito.version>
-        <slf4j.version>2.0.13</slf4j.version>
-        <logback.version>1.4.14</logback.version>
+
+        <!-- Test -->
+        <junit.version>5.11.3</junit.version>
+        <mockito.version>5.15.2</mockito.version>
+
+        <!-- Logging -->
+        <slf4j.version>2.0.17</slf4j.version>
+        <logback.version>1.5.18</logback.version>
+
+        <!-- Maven Plugins -->
+        <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
+        <maven-surefire-plugin.version>3.5.2</maven-surefire-plugin.version>
+        <flatten-maven-plugin.version>1.6.0</flatten-maven-plugin.version>
     </properties>
+
     <dependencyManagement>
         <dependencies>
+            <!-- Internal -->
             <dependency>
                 <groupId>com.mingsha.jvm</groupId>
                 <artifactId>mingsha-jvm-core</artifactId>
@@ -78,6 +94,8 @@
                 <artifactId>mingsha-jvm-boot</artifactId>
                 <version>${project.version}</version>
             </dependency>
+
+            <!-- External -->
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
@@ -108,6 +126,7 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
     <dependencies>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -133,22 +152,23 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.12.1</version>
+                <version>${maven-compiler-plugin.version}</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.2.5</version>
+                <version>${maven-surefire-plugin.version}</version>
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>flatten-maven-plugin</artifactId>
-                <version>1.6.0</version>
+                <version>${flatten-maven-plugin.version}</version>
                 <configuration>
                     <updatePomFile>true</updatePomFile>
                 </configuration>

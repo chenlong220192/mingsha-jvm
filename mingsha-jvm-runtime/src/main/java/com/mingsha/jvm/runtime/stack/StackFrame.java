@@ -219,6 +219,48 @@ public class StackFrame {
         logger.trace("Set local[{}] = {}", index, value);
     }
 
+    /**
+     * Gets long local variable (occupies two slots: index and index+1).
+     *
+     * @param index variable index (the lower index)
+     * @return long value
+     */
+    public long getLocalVariableLong(int index) {
+        return ((Long) localVariables[index]).longValue();
+    }
+
+    /**
+     * Sets long local variable (occupies two slots: index and index+1).
+     *
+     * @param index variable index (the lower index)
+     * @param value long value
+     */
+    public void setLocalVariableLong(int index, long value) {
+        localVariables[index] = Long.valueOf(value);
+        logger.trace("Set local[{}] = {}L", index, value);
+    }
+
+    /**
+     * Gets double local variable.
+     *
+     * @param index variable index
+     * @return double value
+     */
+    public double getLocalVariableDouble(int index) {
+        return ((Double) localVariables[index]).doubleValue();
+    }
+
+    /**
+     * Sets double local variable.
+     *
+     * @param index variable index
+     * @param value double value
+     */
+    public void setLocalVariableDouble(int index, double value) {
+        localVariables[index] = Double.valueOf(value);
+        logger.trace("Set local[{}] = {}D", index, value);
+    }
+
     /** @return current stack depth */
     public int getStackDepth() { return operandStackTop; }
 

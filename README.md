@@ -1,6 +1,6 @@
 # 🚀 Mingsha JVM
 
-![Version](https://img.shields.io/badge/version-1.0.0--SNAPSHOT-blue.svg)
+![Version](https://img.shields.io/badge/version-2026.04.09-blue.svg)
 ![Java](https://img.shields.io/badge/java-17-orange.svg)
 ![License](https://img.shields.io/badge/license-GPL--2.0-green.svg)
 
@@ -26,7 +26,7 @@
 | 🚀 **JIT Compiler** | Hot spot detection and compilation cache |
 | 🔌 **Native Interface** | JNI simulation for core Java classes |
 | 🛠️ **Diagnostic Tools** | jps, jstack, jmap, jinfo utilities |
-| 🧪 **Comprehensive Testing** | JUnit 5 with 100+ unit tests |
+| 🧪 **Comprehensive Testing** | JUnit 5 with 116+ unit tests |
 
 ---
 
@@ -43,7 +43,7 @@
 | `mingsha-jvm-native` | ✅ JNI simulation implementation |
 | `mingsha-jvm-tools` | ✅ Diagnostic tools (jps, jstack, jmap, jinfo) |
 | `mingsha-jvm-boot` | ✅ JVM bootstrap and main entry point |
-| `mingsha-jvm-assembly` | ✅ Distribution packaging configuration |
+| `assembly` | ✅ Distribution packaging configuration |
 
 ---
 
@@ -123,7 +123,7 @@ mingsha-jvm/
 ├── mingsha-jvm-native/       # ✅ Native module
 ├── mingsha-jvm-tools/       # ✅ Tools module
 ├── mingsha-jvm-boot/        # ✅ Boot module
-└── mingsha-jvm-assembly/    # ✅ Assembly module
+└── assembly/    # ✅ Assembly module
 ```
 
 ---
@@ -134,8 +134,8 @@ After running `make package`, the distribution packages will be created in `targ
 
 ```
 target/
-├── mingsha-jvm-1.0.0-bin.tar.gz    # ✅ Distribution package (tar.gz)
-└── mingsha-jvm-1.0.0-bin.zip         # ✅ Distribution package (zip)
+├── mingsha-jvm-2026.04.09-bin.tar.gz    # ✅ Distribution package (tar.gz)
+└── mingsha-jvm-2026.04.09-bin.zip         # ✅ Distribution package (zip)
 ```
 
 **Extract and run:**
@@ -175,7 +175,7 @@ cd mingsha-jvm-1.0.0
 | L1 | Unit Tests | ✅ Passed | 103 |
 | L2 | Integration Tests | ✅ Passed | All modules compile |
 | L3 | Bootstrap Test | ✅ Passed | HelloWorld executes |
-| L4 | Test Suite | ✅ Passed | 5 tests |
+| L4 | Test Suite | ✅ Passed | 12 tests |
 
 ### Test Details
 
@@ -187,7 +187,7 @@ cd mingsha-jvm-1.0.0
 | MethodCall | Method call bytecode execution | ✅ |
 | FieldAccess | Field access bytecode execution | ✅ |
 
-**📊 Total: 108 tests (103 unit + 5 L4) - All Passed ✅**
+**📊 Total: 115 tests (103 unit + 12 L4) - All Passed ✅**
 
 ---
 

@@ -16,7 +16,7 @@
 
 ## 📈 开发进度
 
-### 🎉 2026-04-02: v1.0.0 完整版发布 (最终)
+### 🎉 2026-04-09: v2026.04.09 版本更新
 
 #### ✅ 已完成项目
 
@@ -25,7 +25,7 @@
 | 1 | 📝 文档完善 (README, NOTICE, DEVELOPMENT.md, Makefile) | ✅ |
 | 2 | 📦 10 个 Maven 模块实现 | ✅ |
 | 3 | 📖 所有模块 Javadoc + SLF4J 日志 | ✅ |
-| 4 | 🧪 单元测试 (103 tests + 5 L4 tests) | ✅ |
+| 4 | 🧪 单元测试 (115 tests + 12 L4 tests) | ✅ |
 | 5 | 🔧 集成测试 | ✅ |
 | 6 | 🎉 HelloWorld 自举测试 (输出 "Hello, World!") | ✅ |
 | 7 | 🧪 L4 测试套件 (真实字节码执行) | ✅ |
@@ -33,6 +33,7 @@
 | 9 | 📄 ClassFile 解析器和常量池 | ✅ |
 | 10 | 💾 方法解析器和对象堆管理 | ✅ |
 | 11 | ⚙️ 解释器增强 (INVOKESTATIC/VIRTUAL/SPECIAL, NEW, GETFIELD/PUTFIELD) | ✅ |
+| 12 | 🔧 字节码执行 Bug 修复 | ✅ |
 
 ---
 
@@ -49,7 +50,7 @@
 | mingsha-jvm-native | Native | JNI模拟 | ✅ |
 | mingsha-jvm-tools | 工具 | jps/jstack/jmap/jinfo | ✅ |
 | mingsha-jvm-boot | 启动器 | Main入口 | ✅ |
-| mingsha-jvm-assembly | 打包 | 制品生成 | ✅ |
+| assembly | 打包 | 制品生成 | ✅ |
 
 ---
 
@@ -57,12 +58,12 @@
 
 | 级别 | 状态 | 说明 |
 |------|------|------|
-| L1: 单元测试 | ✅ | 103 tests passing |
+| L1: 单元测试 | ✅ | 115 tests passing |
 | L2: 集成测试 | ✅ | All modules compile |
 | L3: HelloWorld | ✅ | 输出 "Hello, World!" |
-| L4: 测试套件 | ✅ | 5 tests (Arithmetic, Conditional, Loop, MethodCall, FieldAccess) |
+| L4: 测试套件 | ✅ | 12 tests |
 
-**📊 总计: 108 tests (103 unit + 5 L4) - 全部通过 ✅**
+**📊 总计: 127 tests (115 unit + 12 L4) - 全部通过 ✅**
 
 ---
 
@@ -98,8 +99,8 @@ mingsha-jvm/
 
 ```
 target/
-├── mingsha-jvm-1.0.0-bin.tar.gz    # ✅ 发行版包 (tar.gz)
-└── mingsha-jvm-1.0.0-bin.zip         # ✅ 发行版包 (zip)
+├── mingsha-jvm-2026.04.09-bin.tar.gz    # ✅ 发行版包 (tar.gz)
+└── mingsha-jvm-2026.04.09-bin.zip         # ✅ 发行版包 (zip)
 ```
 
 ---
